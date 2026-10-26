@@ -4,13 +4,44 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import Optional
 from datetime import datetime, timezone
 from uuid import uuid4
+from pydantic import BaseModel, Field
 from app.core.config import settings
 from app.schemas.schemas import (
     ReportResponse, ReportUpdateRequest, ComplaintCreate, ComplaintResponse,
 )
 from app.services.demo_data import generate_demo_reports, generate_demo_complaints
+from app.services.ai_report_service import generate_ai_report_narrative
 
 router = APIRouter(prefix="/api", tags=["Reports & Complaints"])
+
+
+class AINarrativeRequest(BaseModel):
+    measured_db: float = Field(..., ge=20.0, le=140.0)
+    threshold_db: float = Field(..., ge=20.0, le=140.0)
+    zone_category: str = Field("residential")
+    time_period: str = Field("night")
+    sound_classification: str = Field("construction")
+    confidence: float = Field(0.90, ge=0.0, le=1.0)
+    address: Optional[str] = None
+    incident_id: Optional[str] = None
+    duration_seconds: Optional[float] = 300.0
+
+
+@router.post("/reports/generate-ai-narrative")
+async def create_ai_narrative(payload: AINarrativeRequest):
+    """Generate court-admissible legal narrative and compliance analysis via Groq AI."""
+    return await generate_ai_report_narrative(
+        measured_db=payload.measured_db,
+        threshold_db=payload.threshold_db,
+        zone_category=payload.zone_category,
+        time_period=payload.time_period,
+        sound_classification=payload.sound_classification,
+        confidence=payload.confidence,
+        address=payload.address,
+        incident_id=payload.incident_id,
+        duration_seconds=payload.duration_seconds,
+    )
+
 
 
 # ── Reports ────────────────────────────────────────────────────

@@ -19,10 +19,13 @@ import {
   Music,
   Trees,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  Sparkles,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { audioAPI } from '../services/api';
+import { audioAPI, reportsAPI } from '../services/api';
 
 const CATEGORY_ICONS = {
   traffic: Car,
@@ -46,12 +49,45 @@ export function MobileNoiseDetector() {
   const [evaluating, setEvaluating] = useState(false);
   const [verdictResult, setVerdictResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [aiNarrative, setAiNarrative] = useState(null);
+  const [generatingAi, setGeneratingAi] = useState(false);
+  const [copiedLetter, setCopiedLetter] = useState(false);
 
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const streamRef = useRef(null);
   const audioBufferRef = useRef([]);
   const animFrameRef = useRef(null);
+
+  const handleGenerateAiNarrative = async () => {
+    if (!verdictResult) return;
+    setGeneratingAi(true);
+    try {
+      const res = await reportsAPI.generateAINarrative({
+        measured_db: verdictResult.measured_db,
+        threshold_db: verdictResult.threshold_db,
+        zone_category: verdictResult.zone_category,
+        time_period: verdictResult.time_period,
+        sound_classification: verdictResult.sound_classification,
+        confidence: verdictResult.confidence,
+        address: verdictResult.address,
+        incident_id: verdictResult.incident_id,
+        duration_seconds: 3.0,
+      });
+      setAiNarrative(res.data);
+    } catch (err) {
+      console.error('Failed to generate AI narrative:', err);
+    } finally {
+      setGeneratingAi(false);
+    }
+  };
+
+  const handleCopyLetter = () => {
+    if (!aiNarrative?.formal_complaint_letter) return;
+    navigator.clipboard.writeText(aiNarrative.formal_complaint_letter);
+    setCopiedLetter(true);
+    setTimeout(() => setCopiedLetter(false), 3000);
+  };
 
   // 1. Acquire Phone GPS on Mount
   useEffect(() => {
@@ -446,6 +482,109 @@ export function MobileNoiseDetector() {
               </span>
             </div>
           </div>
+
+          {/* AI Legal Analysis Trigger Button */}
+          {verdictResult.is_pollution_violation && !aiNarrative && (
+            <div className="p-3 bg-white rounded-2xl border border-[#e2e8f0] flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
+                <span className="text-xs font-bold text-[#0f172a]">
+                  Generate AI Court-Admissible Legal Assessment & Complaint Letter
+                </span>
+              </div>
+              <button
+                onClick={handleGenerateAiNarrative}
+                disabled={generatingAi}
+                className="btn btn-primary btn-sm text-xs font-bold rounded-xl flex items-center gap-2 shrink-0 bg-[#8b5cf6] hover:bg-[#7c3aed] border-none text-white"
+              >
+                {generatingAi ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Analyzing with Groq AI...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Draft AI Legal Dossier</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Render Generated AI Narrative */}
+          {aiNarrative && (
+            <div className="p-4 bg-white rounded-2xl border border-[#cbd5e1] space-y-3 shadow-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-[#f1f5f9]">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#0f172a]">
+                  <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
+                  <span>AI Legal & Statutory Assessment (Groq {aiNarrative.ai_model || 'gpt-oss-120b'})</span>
+                </div>
+                <span className="text-[10px] font-mono bg-[#f5f3ff] text-[#7c3aed] px-2 py-0.5 rounded-full border border-[#ddd6fe]">
+                  Court-Admissible Draft
+                </span>
+              </div>
+
+              {/* Executive Summary */}
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#64748b] block">Executive Summary</span>
+                <p className="text-xs text-[#334155] mt-0.5 leading-relaxed font-medium">
+                  {aiNarrative.executive_summary}
+                </p>
+              </div>
+
+              {/* Statutory Legal Reasoning */}
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#64748b] block">Statutory Mandate & Precedents</span>
+                <p className="text-xs text-[#475569] mt-0.5 leading-relaxed">
+                  {aiNarrative.statutory_analysis}
+                </p>
+              </div>
+
+              {/* Health Impact */}
+              {aiNarrative.health_impact && (
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] block">WHO Health Impact Criteria</span>
+                  <p className="text-xs text-[#475569] mt-0.5 leading-relaxed">
+                    {aiNarrative.health_impact}
+                  </p>
+                </div>
+              )}
+
+              {/* Corrective Actions */}
+              {aiNarrative.corrective_recommendations && aiNarrative.corrective_recommendations.length > 0 && (
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] block">Corrective Directives</span>
+                  <ul className="list-disc list-inside text-xs text-[#334155] space-y-0.5 mt-0.5 pl-1">
+                    {aiNarrative.corrective_recommendations.map((rec, idx) => (
+                      <li key={idx}>{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Formal Complaint Letter */}
+              {aiNarrative.formal_complaint_letter && (
+                <div className="pt-2 border-t border-[#f1f5f9]">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] uppercase font-bold text-[#64748b]">
+                      Formal Municipal Complaint Letter
+                    </span>
+                    <button
+                      onClick={handleCopyLetter}
+                      className="text-xs font-bold text-[#059669] hover:underline flex items-center gap-1"
+                    >
+                      {copiedLetter ? <Check className="w-3.5 h-3.5 text-[#059669]" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedLetter ? 'Copied to Clipboard!' : 'Copy Letter'}</span>
+                    </button>
+                  </div>
+                  <pre className="text-[11px] bg-[#f8fafc] border border-[#e2e8f0] p-3 rounded-xl text-[#334155] whitespace-pre-wrap font-sans max-h-48 overflow-y-auto">
+                    {aiNarrative.formal_complaint_letter}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Action CTAs */}
           {verdictResult.is_pollution_violation && (

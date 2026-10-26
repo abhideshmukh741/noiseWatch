@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     ml_model_path: str = "./ml/models/"
     ml_model_version: str = "baseline-v1"
 
+    # AI & Groq LLM
+    groq_api_key: Optional[str] = None
+    groq_model: str = "openai/gpt-oss-120b"
+
     # Demo Mode
     demo_mode: bool = True
 

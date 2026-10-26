@@ -79,6 +79,7 @@ export const reportsAPI = {
   update: (id, data) => api.put(`/api/reports/${id}`, data),
   download: (id) => api.get(`/api/reports/${id}/download`, { responseType: 'blob' }),
   getDownloadUrl: (id) => `${API_BASE}/api/reports/${id}/download`,
+  generateAINarrative: (data) => api.post('/api/reports/generate-ai-narrative', data),
 };
 
 export const audioAPI = {
