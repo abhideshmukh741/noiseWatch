@@ -1,11 +1,11 @@
 /**
  * Navbar Component with Animated Curved Scoop Bubble Navigation
  * 
- * Features:
- * - Fluid curved cutout scoop matching user reference design
- * - Elevated floating circular bubble that pops up on the active tab
- * - Spring physics animation on tab transition
- * - Desktop header integration & mobile floating bottom navigation
+ * Professional UI/UX Refinement:
+ * - Proper vertical clearance (88px) so the raised circular bubble floats with ample breathing room
+ * - Unified single-contour SVG background with zero seam artifacts
+ * - Clean brand mark and minimalist user status area (no visual clutter)
+ * - Responsive: centered desktop integration + floating bottom dock on mobile
  */
 
 import { useState } from 'react';
@@ -17,69 +17,56 @@ export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [navTheme, setNavTheme] = useState('purple'); // 'purple' matching reference, 'emerald' matching NoiseWatch
 
   return (
     <>
       {/* ── Top Header Bar ── */}
-      <nav className="sticky top-0 z-40 bg-[#f8fafc]/95 border-b border-[#e2e8f0] shadow-xs backdrop-blur-none">
+      <nav className="sticky top-0 z-40 bg-[#f8fafc]/95 border-b border-[#e2e8f0]/80">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-[88px]">
 
-            {/* Logo */}
+            {/* Brand Logo */}
             <Link to="/" className="flex items-center gap-2.5 text-[#0f172a] no-underline group shrink-0">
               <span className="text-xl font-bold tracking-tight">
-                Noise<span style={{ color: navTheme === 'purple' ? '#7c3aed' : '#059669' }}>Watch</span>
+                Noise<span className="text-[#7c3aed]">Watch</span>
               </span>
-              <span className="hidden lg:inline-block text-[11px] font-mono text-[#475569] border-l border-[#cbd5e1] pl-2 uppercase tracking-wider font-semibold">
+              <span className="hidden xl:inline-block text-[11px] font-mono text-[#64748b] border-l border-[#cbd5e1] pl-2 uppercase tracking-wider font-semibold">
                 Acoustic Compliance
               </span>
             </Link>
 
-            {/* ── Center: Animated Curved Scoop Bubble Navbar ── */}
+            {/* ── Center: Precision Curved Scoop Bubble Navigation ── */}
             {isAuthenticated && (
-              <div className="hidden md:flex items-center justify-center flex-1 max-w-lg mx-4 pt-3">
-                <CurvedNavbar themeColor={navTheme} />
+              <div className="hidden md:flex items-center justify-center flex-1 max-w-lg mx-auto">
+                <CurvedNavbar />
               </div>
             )}
 
-            {/* Right Section: Theme Toggle, User Profile, Auth */}
+            {/* Right Section: Status, Profile & Actions */}
             <div className="flex items-center gap-3 shrink-0">
               
-              {/* Theme color pill switcher */}
-              <button
-                onClick={() => setNavTheme(navTheme === 'purple' ? 'emerald' : 'purple')}
-                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border border-[#cbd5e1] bg-white text-[#475569] hover:bg-[#f1f5f9] transition-all"
-                title="Toggle between Reference Purple and Botanical Emerald"
-              >
-                <span 
-                  className="w-2.5 h-2.5 rounded-full" 
-                  style={{ backgroundColor: navTheme === 'purple' ? '#7c3aed' : '#059669' }} 
-                />
-                <span className="capitalize">{navTheme} Mode</span>
-              </button>
-
-              {/* Demo Badge */}
-              <span className="demo-badge hidden xl:inline-flex">
-                Demo Mode
-              </span>
+              {/* Status Badge */}
+              <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#e2e8f0] text-xs font-medium text-[#475569] shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+                <span className="text-[11px] font-mono font-semibold">CPCB Network</span>
+              </div>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-3">
-                  {/* User Profile Info */}
-                  <div className="hidden lg:flex flex-col text-right">
+                  {/* User Profile Pill */}
+                  <div className="hidden sm:flex items-center gap-2 bg-white border border-[#e2e8f0] px-3 py-1 rounded-full shadow-2xs">
+                    <div className="w-6 h-6 rounded-full bg-[#f5f3ff] text-[#7c3aed] font-bold text-xs flex items-center justify-center border border-[#ddd6fe]">
+                      {(user?.display_name || 'U').charAt(0).toUpperCase()}
+                    </div>
                     <span className="text-xs font-bold text-[#0f172a]">
-                      {user?.display_name || 'User'}
-                    </span>
-                    <span className="text-[10px] text-[#475569] uppercase tracking-wider font-mono font-semibold">
-                      {user?.role || 'user'}
+                      {user?.display_name || 'Demo User'}
                     </span>
                   </div>
 
                   {/* Logout Button */}
                   <button
                     onClick={logout}
-                    className="btn btn-secondary btn-sm text-xs py-1.5 px-3.5 font-semibold rounded-full"
+                    className="btn btn-secondary btn-sm text-xs py-1.5 px-3.5 font-semibold rounded-full hover:bg-[#fee2e2] hover:text-[#dc2626] hover:border-[#fca5a5] transition-colors"
                     aria-label="Logout"
                   >
                     Logout
@@ -88,7 +75,7 @@ export default function Navbar() {
               ) : (
                 <div className="flex items-center gap-2">
                   <Link to="/login" className="btn btn-secondary btn-sm text-xs rounded-full">Login</Link>
-                  <Link to="/register" className="btn btn-primary btn-sm text-xs rounded-full">Sign Up</Link>
+                  <Link to="/register" className="btn btn-primary btn-sm text-xs rounded-full bg-[#7c3aed] hover:bg-[#6d28d9] border-[#7c3aed]">Sign Up</Link>
                 </div>
               )}
 
@@ -132,8 +119,8 @@ export default function Navbar() {
       {/* ── Mobile Floating Curved Scoop Bottom Navigation ── */}
       {isAuthenticated && (
         <div className="fixed bottom-4 inset-x-0 z-50 flex justify-center px-3 md:hidden pointer-events-none">
-          <div className="pointer-events-auto w-full max-w-sm">
-            <CurvedNavbar themeColor={navTheme} />
+          <div className="pointer-events-auto">
+            <CurvedNavbar isFloating={true} />
           </div>
         </div>
       )}

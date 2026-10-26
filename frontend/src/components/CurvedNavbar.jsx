@@ -1,17 +1,18 @@
 /**
  * Curved Animated Scoop Navbar Component
  * 
- * Implements the curved cutout bubble navigation bar inspired by modern mobile UI:
- * - Fluid scooped curve cutout on the active tab
- * - Floating circular bubble that pops up with spring physics
- * - Smooth SVG Bézier transition on route change
- * - Dual color mode: Vibrant Purple (#7c3aed) matching reference design + Botanical Emerald (#059669)
+ * Professional UI/UX Implementation:
+ * - Single seamless SVG contour with mathematically calculated Bézier curve cutout
+ * - Floating circular bubble with spring transition
+ * - Zero background color mismatch or seam artifacts
+ * - Beautiful drop-shadow and ambient elevation
+ * - Vibrant color scheme matching reference image (#7c3aed Purple / #059669 Emerald)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-// Clean inline SVGs matching the reference image icons
+// Clean, balanced SVG icons matching reference image
 const HomeIcon = ({ className = "w-5 h-5", active }) => (
   <svg 
     className={className} 
@@ -22,19 +23,7 @@ const HomeIcon = ({ className = "w-5 h-5", active }) => (
     strokeLinecap="round" 
     strokeLinejoin="round"
   >
-    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1V9.5z" />
-  </svg>
-);
-
-const ChartIcon = ({ className = "w-5 h-5", active }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill="currentColor"
-  >
-    <rect x="4" y="10" width="3.5" height="11" rx="1.5" opacity={active ? "1" : "0.75"} />
-    <rect x="10.25" y="4" width="3.5" height="17" rx="1.5" />
-    <rect x="16.5" y="13" width="3.5" height="8" rx="1.5" opacity={active ? "1" : "0.6"} />
+    <path d="M3 10.5L12 3l9 7.5V20a1.5 1.5 0 01-1.5 1.5h-5a1 1 0 01-1-1v-5h-5v5a1 1 0 01-1 1h-5A1.5 1.5 0 013 20V10.5z" />
   </svg>
 );
 
@@ -44,7 +33,7 @@ const MapIcon = ({ className = "w-5 h-5", active }) => (
     viewBox="0 0 24 24" 
     fill={active ? "currentColor" : "none"} 
     stroke="currentColor" 
-    strokeWidth="2"
+    strokeWidth="2" 
     strokeLinecap="round" 
     strokeLinejoin="round"
   >
@@ -54,7 +43,19 @@ const MapIcon = ({ className = "w-5 h-5", active }) => (
   </svg>
 );
 
-const DocumentIcon = ({ className = "w-5 h-5", active }) => (
+const HistoryChartIcon = ({ className = "w-5 h-5", active }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill="currentColor"
+  >
+    <rect x="4" y="11" width="3.5" height="10" rx="1.5" opacity={active ? "1" : "0.7"} />
+    <rect x="10.25" y="4" width="3.5" height="17" rx="1.5" />
+    <rect x="16.5" y="13" width="3.5" height="8" rx="1.5" opacity={active ? "1" : "0.55"} />
+  </svg>
+);
+
+const ReportsIcon = ({ className = "w-5 h-5", active }) => (
   <svg 
     className={className} 
     viewBox="0 0 24 24" 
@@ -68,98 +69,106 @@ const DocumentIcon = ({ className = "w-5 h-5", active }) => (
     <polyline points="14 2 14 8 20 8" />
     <line x1="16" y1="13" x2="8" y2="13" />
     <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10 9 9 9 8 9" />
-  </svg>
-);
-
-const UserIcon = ({ className = "w-5 h-5", active }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill={active ? "currentColor" : "none"} 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
 export const NAV_ITEMS = [
   { path: '/dashboard', label: 'Home', icon: HomeIcon },
   { path: '/map', label: 'Map', icon: MapIcon },
-  { path: '/analytics', label: 'History', icon: ChartIcon },
-  { path: '/reports', label: 'Reports', icon: DocumentIcon },
+  { path: '/analytics', label: 'History', icon: HistoryChartIcon },
+  { path: '/reports', label: 'Reports', icon: ReportsIcon },
 ];
 
-export function CurvedNavbar({ themeColor = 'purple' }) {
+export function CurvedNavbar({ isFloating = false }) {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Find active index based on route
+  // Active tab index
   const activeIdx = Math.max(
     0,
     NAV_ITEMS.findIndex(item => item.path === currentPath || (item.path !== '/' && currentPath.startsWith(item.path)))
   );
 
-  const activeItem = NAV_ITEMS[activeIdx] || NAV_ITEMS[0];
-  const ActiveIcon = activeItem.icon;
+  // Width & height dimensions of the navbar
+  const totalWidth = 440;
+  const height = 66;
+  const itemWidth = totalWidth / NAV_ITEMS.length; // 110px per item
+  
+  // Calculate center X of the active tab
+  const activeX = (activeIdx + 0.5) * itemWidth;
 
-  // Theme styling (purple matches reference image; emerald matches NoiseWatch)
-  const isPurple = themeColor === 'purple';
-  const accentColor = isPurple ? '#7c3aed' : '#059669';
-  const accentLight = isPurple ? '#f5f3ff' : '#ecfdf5';
+  // Smooth state transition for scoop center
+  const [currentX, setCurrentX] = useState(activeX);
+
+  useEffect(() => {
+    setCurrentX(activeX);
+  }, [activeX]);
+
+  // Generate SVG path contour with smooth scooped Bézier dip at X
+  const R = 22; // corner radius
+  const scoopWidth = 44; // half-width of scoop (88px total width)
+  const scoopDepth = 28; // depth of the scooped dip
+  
+  const pathD = `
+    M ${R},0
+    L ${Math.max(R, currentX - scoopWidth)},0
+    C ${currentX - 22},0 ${currentX - 22},${scoopDepth} ${currentX},${scoopDepth}
+    C ${currentX + 22},${scoopDepth} ${currentX + 22},0 ${Math.min(totalWidth - R, currentX + scoopWidth)},0
+    L ${totalWidth - R},0
+    A ${R},${R} 0 0 1 ${totalWidth},${R}
+    L ${totalWidth},${height - R}
+    A ${R},${R} 0 0 1 ${totalWidth - R},${height}
+    L ${R},${height}
+    A ${R},${R} 0 0 1 0,${height - R}
+    L 0,${R}
+    A ${R},${R} 0 0 1 ${R},0
+    Z
+  `;
+
+  const ActiveIcon = NAV_ITEMS[activeIdx]?.icon || HomeIcon;
 
   return (
-    <div className="relative w-full max-w-xl mx-auto py-3 px-4">
+    <div className="relative select-none" style={{ width: `${totalWidth}px`, height: `${height + 24}px` }}>
       
-      {/* ── Main Curved Navigation Card ── */}
-      <div className="relative bg-white rounded-[2.5rem] shadow-xl border border-[#e2e8f0]/80 h-[72px] flex items-center justify-around px-2">
-        
-        {/* ── Floating Scoop & Bubble (Spring Animated) ── */}
+      {/* ── Background SVG Contour with Drop Shadow ── */}
+      <svg 
+        width={totalWidth} 
+        height={height} 
+        viewBox={`0 0 ${totalWidth} ${height}`} 
+        className="absolute top-6 left-0 transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        style={{
+          filter: 'drop-shadow(0 14px 28px rgba(15, 23, 42, 0.09)) drop-shadow(0 4px 10px rgba(15, 23, 42, 0.04))',
+        }}
+      >
+        <path 
+          d={pathD} 
+          fill="#ffffff" 
+          stroke="#e2e8f0" 
+          strokeWidth="1"
+          className="transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        />
+      </svg>
+
+      {/* ── Elevated Floating Circular Bubble ── */}
+      <div 
+        className="absolute top-0 flex flex-col items-center pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20"
+        style={{
+          left: `${currentX - 27}px`,
+          width: '54px',
+        }}
+      >
         <div 
-          className="absolute -top-6 flex flex-col items-center pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20"
+          className="w-[54px] h-[54px] rounded-full bg-white shadow-xl flex items-center justify-center border-4 border-[#f8fafc] text-[#7c3aed] transition-transform duration-300 transform hover:scale-105"
           style={{
-            left: `calc(${(activeIdx * 100) / NAV_ITEMS.length}% + ${50 / NAV_ITEMS.length}% - 44px)`,
-            width: '88px',
+            boxShadow: '0 10px 24px -2px rgba(124, 58, 237, 0.38), 0 4px 8px -2px rgba(124, 58, 237, 0.2)',
           }}
         >
-          {/* SVG Scoop Cutout that perfectly matches background */}
-          <div className="absolute top-[26px] w-[88px] h-[32px] overflow-hidden">
-            <svg 
-              width="88" 
-              height="32" 
-              viewBox="0 0 88 32" 
-              fill="none" 
-              className="w-full h-full"
-            >
-              <path
-                d="M 0 0 C 18 0 24 30 44 30 C 64 30 70 0 88 0 L 88 32 L 0 32 Z"
-                fill="#f8fafc"
-              />
-            </svg>
-          </div>
-
-          {/* Elevated Circular Bubble with Active Icon */}
-          <div 
-            className="w-14 h-14 rounded-full bg-white shadow-xl flex items-center justify-center border-4 border-[#f8fafc] z-30 transition-transform duration-300 transform scale-100 hover:scale-105"
-            style={{
-              boxShadow: isPurple 
-                ? '0 10px 25px -4px rgba(124, 58, 237, 0.35), 0 4px 10px -2px rgba(124, 58, 237, 0.2)'
-                : '0 10px 25px -4px rgba(5, 150, 105, 0.35), 0 4px 10px -2px rgba(5, 150, 105, 0.2)',
-            }}
-          >
-            <ActiveIcon 
-              className="w-6 h-6 transition-colors duration-200" 
-              style={{ color: accentColor }}
-              active={true}
-            />
-          </div>
+          <ActiveIcon className="w-5 h-5 text-[#7c3aed]" active={true} />
         </div>
+      </div>
 
-        {/* ── Navigation Items ── */}
+      {/* ── Interactive Links Grid ── */}
+      <div className="absolute top-6 left-0 w-full h-[66px] flex items-center z-10">
         {NAV_ITEMS.map((item, idx) => {
           const isActive = idx === activeIdx;
           const Icon = item.icon;
@@ -168,12 +177,13 @@ export function CurvedNavbar({ themeColor = 'purple' }) {
             <Link
               key={item.path}
               to={item.path}
-              className="relative flex-1 flex flex-col items-center justify-center h-full no-underline transition-all group z-10"
+              className="flex-1 flex flex-col items-center justify-center h-full no-underline transition-all group"
+              style={{ width: `${itemWidth}px` }}
             >
-              {/* Inactive Icon (drops down into bar when not active, fades out when active) */}
+              {/* Inactive Icon (drops inside bar, fades out when active) */}
               <div 
                 className={`transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'opacity-0 -translate-y-4 pointer-events-none' : 'opacity-70 group-hover:opacity-100 translate-y-0 text-[#64748b]'
+                  isActive ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-65 group-hover:opacity-100 translate-y-[-2px] text-[#64748b]'
                 }`}
               >
                 <Icon className="w-5 h-5" active={false} />
@@ -181,22 +191,19 @@ export function CurvedNavbar({ themeColor = 'purple' }) {
 
               {/* Text Label Below */}
               <span 
-                className={`text-xs font-bold transition-all duration-300 mt-1 ${
+                className={`text-[11px] font-bold tracking-tight transition-all duration-300 ${
                   isActive 
-                    ? 'translate-y-2.5 font-extrabold' 
-                    : 'text-[#64748b] group-hover:text-[#0f172a]'
+                    ? 'text-[#7c3aed] translate-y-2 font-extrabold scale-105' 
+                    : 'text-[#64748b] group-hover:text-[#0f172a] translate-y-0'
                 }`}
-                style={{
-                  color: isActive ? accentColor : undefined,
-                }}
               >
                 {item.label}
               </span>
             </Link>
           );
         })}
-
       </div>
+
     </div>
   );
 }
