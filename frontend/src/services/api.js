@@ -80,6 +80,8 @@ export const reportsAPI = {
   download: (id) => api.get(`/api/reports/${id}/download`, { responseType: 'blob' }),
   getDownloadUrl: (id) => `${API_BASE}/api/reports/${id}/download`,
   generateAINarrative: (data) => api.post('/api/reports/generate-ai-narrative', data),
+  researchBylawsAgno: (data) => api.post('/api/reports/agno-research', data),
+  generateAgnoDossier: (data) => api.post('/api/reports/agno-dossier', data),
 };
 
 export const audioAPI = {

@@ -32,40 +32,44 @@ async def generate_ai_report_narrative(
     Falls back to structured rule-based narrative if Groq API is unreachable.
     """
     api_key = settings.groq_api_key or os.getenv("GROQ_API_KEY")
-    model = settings.groq_model or "openai/gpt-oss-120b"
+    model = settings.groq_model or "qwen/qwen3.8-27b"
     excess_db = round(max(0.0, measured_db - threshold_db), 1)
 
     system_prompt = (
-        "You are an expert Environmental Acoustic Intelligence and Environmental Law Analyst "
-        "specializing in noise pollution regulatory compliance (The Noise Pollution (Regulation and Control) Rules, 2000, "
-        "Environment Protection Act 1986, and World Health Organization Guidelines for Community Noise). "
-        "Analyze the provided acoustic incident telemetry and return a structured JSON response with precise, "
-        "court-admissible language, statutory legal reasoning, and actionable corrective directives."
+        "You are an expert Indian Environmental Acoustic Intelligence and Environmental Law Analyst "
+        "specializing exclusively in the laws of the Republic of India: "
+        "1. The Noise Pollution (Regulation and Control) Rules, 2000 (under Environment Protection Act 1986). "
+        "2. Central Pollution Control Board (CPCB) ambient air quality standards in respect of noise. "
+        "3. Article 21 of the Constitution of India (Right to peaceful sleep and pollution-free life). "
+        "4. Section 133 CrPC / Bharatiya Nagarik Suraksha Sanhita (BNSS) for public nuisance. "
+        "Analyze the acoustic telemetry and return a structured JSON response with precise, "
+        "court-admissible Indian legal reasoning, statutory citations, and an official complaint letter "
+        "addressed to the Indian Competent Authority (Municipal Commissioner / Police Commissioner / SPCB)."
     )
 
     user_prompt = f"""
-Analyze this environmental acoustic incident telemetry:
-- Incident ID: {incident_id or 'INC-MOB-NEW'}
-- Measured Sound Pressure Level: {measured_db} dB(A)
-- Statutory Threshold Limit: {threshold_db} dB(A)
+Analyze this environmental acoustic incident telemetry recorded in INDIA:
+- Incident ID: {incident_id or 'INC-IND-MOB-01'}
+- Measured Sound Pressure Level: {measured_db} dB(A) Leq
+- CPCB Statutory Threshold Limit: {threshold_db} dB(A)
 - Decibel Exceedance: +{excess_db} dB(A)
-- Zone Category: {zone_category.upper()}
-- Time of Occurrence: {time_period.upper()} Hours
-- Acoustic Event ML Signature: {sound_classification.upper()} (ML Model Confidence: {round(confidence * 100, 1)}%)
-- Location / Address: {address or 'Monitored Municipal Coordinate'}
+- CPCB Zone Category: {zone_category.upper()}
+- Time of Occurrence: {time_period.upper()} Hours (Rule 5 Night Curfew applies 22:00 to 06:00)
+- Acoustic Event ML Signature: {sound_classification.upper()} (Model Confidence: {round(confidence * 100, 1)}%)
+- Location / Address: {address or 'Monitored Indian Municipal Coordinate'}
 - Duration: {duration_seconds} seconds
 
 Respond ONLY with valid JSON with the following exact keys:
 {{
-  "executive_summary": "2-3 concise sentences summarizing the technical exceedance, acoustic source, and regulatory breach.",
-  "statutory_analysis": "Detailed legal reasoning citing Rule 3(1), Rule 4, and relevant time curfew mandates.",
-  "health_impact": "Analysis of potential sleep disruption, stress, or auditory strain based on WHO noise criteria.",
+  "executive_summary": "2-3 concise sentences summarizing the technical exceedance, acoustic source, and regulatory breach under Indian Noise Rules 2000.",
+  "statutory_analysis": "Detailed Indian legal reasoning citing Rule 3(1), Rule 5(1), and Environment (Protection) Act 1986 Section 15.",
+  "health_impact": "Analysis of sleep architecture disruption, cardiovascular stress, and auditory strain referencing ICMR / CPCB guidelines.",
   "corrective_recommendations": [
     "Directive 1...",
     "Directive 2...",
     "Directive 3..."
   ],
-  "formal_complaint_letter": "A complete, formal complaint letter formatted to the Competent Municipal Authority / Pollution Control Board citing this evidence."
+  "formal_complaint_letter": "A complete, formal complaint letter formatted to the Commissioner of Police / Municipal Commissioner / Member Secretary SPCB citing this evidence and demanding action under Rule 8 and Sec 133 CrPC/BNSS."
 }}
 """
 

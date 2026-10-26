@@ -11,6 +11,10 @@ from app.schemas.schemas import (
 )
 from app.services.demo_data import generate_demo_reports, generate_demo_complaints
 from app.services.ai_report_service import generate_ai_report_narrative
+from app.services.agno_research_service import (
+    research_local_bylaws,
+    enhance_complaint_with_agno,
+)
 
 router = APIRouter(prefix="/api", tags=["Reports & Complaints"])
 
@@ -27,9 +31,27 @@ class AINarrativeRequest(BaseModel):
     duration_seconds: Optional[float] = 300.0
 
 
+class AgnoResearchRequest(BaseModel):
+    city: str = Field(..., description="Indian city or locality (e.g. Mumbai, Bengaluru, Pune)")
+    state: str = Field(..., description="Indian state (e.g. Maharashtra, Karnataka)")
+    zone_type: str = Field("residential", description="CPCB zone category")
+    sound_category: str = Field("traffic", description="Identified sound class")
+
+
+class AgnoDossierRequest(BaseModel):
+    city: str = Field(...)
+    state: str = Field(...)
+    zone_type: str = Field("residential")
+    measured_db: float = Field(..., ge=20.0, le=140.0)
+    threshold_db: float = Field(..., ge=20.0, le=140.0)
+    sound_category: str = Field("traffic")
+    confidence: float = Field(0.90, ge=0.0, le=1.0)
+    address: Optional[str] = ""
+
+
 @router.post("/reports/generate-ai-narrative")
 async def create_ai_narrative(payload: AINarrativeRequest):
-    """Generate court-admissible legal narrative and compliance analysis via Groq AI."""
+    """Generate court-admissible legal narrative and compliance analysis via Groq AI under Indian Law."""
     return await generate_ai_report_narrative(
         measured_db=payload.measured_db,
         threshold_db=payload.threshold_db,
@@ -40,6 +62,32 @@ async def create_ai_narrative(payload: AINarrativeRequest):
         address=payload.address,
         incident_id=payload.incident_id,
         duration_seconds=payload.duration_seconds,
+    )
+
+
+@router.post("/reports/agno-research")
+async def agno_live_research(payload: AgnoResearchRequest):
+    """Research local Indian municipal bylaws, helplines, and NGT precedents using Agno with internet access."""
+    return await research_local_bylaws(
+        city=payload.city,
+        state=payload.state,
+        zone_type=payload.zone_type,
+        sound_category=payload.sound_category,
+    )
+
+
+@router.post("/reports/agno-dossier")
+async def agno_enhanced_dossier(payload: AgnoDossierRequest):
+    """Generate an enhanced legal complaint dossier using Agno with live Indian internet research."""
+    return await enhance_complaint_with_agno(
+        city=payload.city,
+        state=payload.state,
+        zone_type=payload.zone_type,
+        measured_db=payload.measured_db,
+        threshold_db=payload.threshold_db,
+        sound_category=payload.sound_category,
+        confidence=payload.confidence,
+        address=payload.address or "",
     )
 
 
