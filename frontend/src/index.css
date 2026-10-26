@@ -90,17 +90,58 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid #e2e8f0;
   border-radius: 1.5rem;
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
               border-color 0.25s ease;
   position: relative;
   overflow: hidden;
 }
 
 .glass-card:hover {
-  border-color: #cbd5e1;
-  transform: translateY(-3px);
-  box-shadow: 0 20px 35px -8px rgba(15, 23, 42, 0.08), 0 8px 16px -6px rgba(5, 150, 105, 0.05);
+  border-color: #00a88f;
+  transform: translateY(-6px);
+  box-shadow: 0 24px 45px -10px rgba(15, 23, 42, 0.1), 0 10px 20px -6px rgba(0, 168, 143, 0.12);
+}
+
+.stat-card-delight {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.65rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.stat-card-delight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: linear-gradient(90deg, #00a88f 0%, #ff5757 50%, #00a88f 100%);
+  background-size: 200% auto;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  z-index: 10;
+}
+
+.stat-card-delight:hover {
+  transform: translateY(-8px) scale(1.018);
+  border-color: #00a88f;
+  box-shadow: 0 26px 50px -12px rgba(15, 23, 42, 0.12),
+              0 12px 24px -8px rgba(0, 168, 143, 0.18);
+}
+
+.stat-card-delight:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 .curvy-card {
@@ -404,3 +445,226 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* ── Qwilr-Inspired Minimalist Design System & Device Mockup Styling ─────── */
+:root {
+  --qwilr-teal: #00a88f;
+  --qwilr-teal-hover: #00937d;
+  --qwilr-teal-light: #e6f7f5;
+  --qwilr-coral: #ff5757;
+  --qwilr-coral-hover: #e64545;
+  --qwilr-coral-light: #fff0f0;
+  --qwilr-dark: #1e2430;
+  --qwilr-gray: #58647a;
+  --qwilr-border: #e2e8f0;
+}
+
+.btn-qwilr-teal {
+  background-color: #00a88f;
+  color: #ffffff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 4px;
+  border: 1px solid #00a88f;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 168, 143, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-qwilr-teal:hover {
+  background-color: #00937d;
+  border-color: #00937d;
+  box-shadow: 0 6px 16px rgba(0, 168, 143, 0.3);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.btn-qwilr-outline {
+  background-color: transparent;
+  color: #1e2430;
+  border: 1px solid #cbd5e1;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-qwilr-outline:hover {
+  border-color: #00a88f;
+  color: #00a88f;
+  background-color: #f0fdfa;
+}
+
+.phone-mockup-shadow {
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 10px 25px -10px rgba(0, 0, 0, 0.2);
+}
+
+.phone-mockup-front-shadow {
+  box-shadow: 0 35px 80px -20px rgba(15, 23, 42, 0.45), 0 15px 35px -10px rgba(0, 0, 0, 0.3);
+}
+
+.floating-mic-badge {
+  background-color: #00a88f;
+  box-shadow: 0 10px 25px -5px rgba(0, 168, 143, 0.5), 0 8px 10px -6px rgba(0, 168, 143, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-mic-badge:hover {
+  transform: scale(1.08) translateY(-3px);
+  box-shadow: 0 18px 35px -5px rgba(0, 168, 143, 0.6);
+}
+
+/* ── Acoustic Pulse Radar Waves & Glowing Accents ──────────── */
+@keyframes acoustic-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.22;
+  }
+  100% {
+    transform: scale(1.42);
+    opacity: 0;
+  }
+}
+
+.acoustic-ripple-1 {
+  animation: acoustic-pulse 4.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+}
+
+.acoustic-ripple-2 {
+  animation: acoustic-pulse 4.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite 1.5s;
+}
+
+.acoustic-ripple-3 {
+  animation: acoustic-pulse 4.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite 3s;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+}
+
+.animate-float-reverse {
+  animation: float-reverse 4.5s ease-in-out infinite;
+}
+
+/* ── Geometric Non-Cube Architectural Shapes ──────────────── */
+.shape-arch {
+  border-radius: 80px 80px 24px 24px;
+}
+
+.shape-arch-inverted {
+  border-radius: 24px 24px 80px 80px;
+}
+
+.shape-pebble-1 {
+  border-radius: 64px 20px 64px 20px;
+}
+
+.shape-pebble-2 {
+  border-radius: 20px 64px 20px 64px;
+}
+
+.shape-asymmetric-deck {
+  border-radius: 64px 24px 64px 24px;
+}
+
+.shape-lens {
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+}
+
+/* ── Premium Tactile Hover Interactions for Geometric Cards ── */
+.card-hover-interactive {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              background-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover-interactive:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 25px 45px -12px rgba(15, 23, 42, 0.12), 
+              0 10px 20px -8px rgba(0, 168, 143, 0.08);
+}
+
+.card-hover-teal {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover-teal:hover {
+  transform: translateY(-8px) scale(1.015);
+  border-color: #00a88f;
+  box-shadow: 0 25px 50px -15px rgba(0, 168, 143, 0.2), 
+              0 8px 16px -6px rgba(0, 168, 143, 0.12);
+}
+
+.card-hover-coral {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover-coral:hover {
+  transform: translateY(-8px) scale(1.015);
+  border-color: #ff5757;
+  box-shadow: 0 25px 50px -15px rgba(255, 87, 87, 0.2), 
+              0 8px 16px -6px rgba(255, 87, 87, 0.12);
+}
+
+.card-hover-amber {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover-amber:hover {
+  transform: translateY(-8px) scale(1.015);
+  border-color: #d97706;
+  box-shadow: 0 25px 50px -15px rgba(217, 119, 6, 0.2), 
+              0 8px 16px -6px rgba(217, 119, 6, 0.12);
+}
+
+.lens-hover-pulse {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lens-hover-pulse:hover {
+  transform: scale(1.06);
+  box-shadow: 0 20px 40px -10px rgba(0, 168, 143, 0.3);
+}
+

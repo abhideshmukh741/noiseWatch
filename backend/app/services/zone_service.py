@@ -64,7 +64,9 @@ async def detect_zone_from_gps(lat: float, lon: float) -> Dict[str, Any]:
 
     Falls back to residential if network or geocoding is unavailable.
     """
-    time_period = get_current_time_period()
+    now = datetime.now()
+    time_period = get_current_time_period(now)
+    ist_hour = now.hour
     detected_zone = "residential"
     address_str = f"Coordinates: {round(lat, 4)}° N, {round(lon, 4)}° E"
     source = "fallback_heuristic"

@@ -207,7 +207,7 @@ export function AcousticModelCard() {
   const currentCategory = classificationResult?.category || 'traffic';
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-[#cbd5e1] shadow-xs space-y-6">
+    <div className="bg-white p-6 rounded-3xl border border-[#cbd5e1] shadow-xs space-y-6 card-hover-interactive hover:border-[#00a88f]/40">
       
       {/* ── Header: Model Provenance & Status Badge (Zero Icons) ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#f1f5f9]">

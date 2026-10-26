@@ -179,12 +179,12 @@ export function CurvedNavbar({ isFloating = false }) {
         }}
       >
         <div 
-          className="w-[54px] h-[54px] rounded-full bg-white shadow-xl flex items-center justify-center border-4 border-[#f8fafc] text-[#7c3aed] transition-transform duration-300 transform hover:scale-105"
+          className="w-[54px] h-[54px] rounded-full bg-white shadow-xl flex items-center justify-center border-4 border-[#f8fafc] text-[#00a88f] transition-transform duration-300 transform hover:scale-105"
           style={{
-            boxShadow: '0 10px 24px -2px rgba(124, 58, 237, 0.38), 0 4px 8px -2px rgba(124, 58, 237, 0.2)',
+            boxShadow: '0 10px 24px -2px rgba(0, 168, 143, 0.4), 0 4px 8px -2px rgba(0, 168, 143, 0.2)',
           }}
         >
-          <ActiveIcon className="w-5 h-5 text-[#7c3aed]" active={true} />
+          <ActiveIcon className="w-5 h-5 text-[#00a88f]" active={true} />
         </div>
       </div>
 
@@ -214,7 +214,7 @@ export function CurvedNavbar({ isFloating = false }) {
               <span 
                 className={`text-[11px] font-bold tracking-tight transition-all duration-300 ${
                   isActive 
-                    ? 'text-[#7c3aed] translate-y-2 font-extrabold scale-105' 
+                    ? 'text-[#00a88f] translate-y-2 font-extrabold scale-105' 
                     : 'text-[#64748b] group-hover:text-[#0f172a] translate-y-0'
                 }`}
               >
