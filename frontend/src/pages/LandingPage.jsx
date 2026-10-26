@@ -79,7 +79,7 @@ export default function LandingPage() {
                 />
                 
                 {/* Floating Telemetry Badge Overlay */}
-                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md border border-[#e2e8f0] rounded-full px-4 py-1.5 shadow-md flex items-center gap-2.5 text-xs">
+                <div className="absolute top-3 left-3 bg-white border border-[#cbd5e1] rounded-full px-4 py-1.5 shadow-md flex items-center gap-2.5 text-xs">
                   <span className="status-dot status-dot--active" />
                   <span className="font-mono font-bold text-[#0f172a]">54.3 dB(A)</span>
                   <span className="text-[10px] text-[#475569] font-semibold uppercase">Park Station #01</span>
@@ -250,7 +250,7 @@ export default function LandingPage() {
                     alt="Precision Sound Level Meter Calibration in Acoustic Laboratory"
                     className="w-full h-full object-cover rounded-2xl"
                   />
-                  <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md border border-[#e2e8f0] rounded-full px-4 py-1.5 text-[11px] font-mono font-bold text-[#0f172a] shadow-sm">
+                  <div className="absolute bottom-3 left-3 bg-white border border-[#cbd5e1] rounded-full px-4 py-1.5 text-[11px] font-mono font-bold text-[#0f172a] shadow-sm">
                     Class 1 Reference: ±0.7 dB
                   </div>
                 </div>

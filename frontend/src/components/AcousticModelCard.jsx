@@ -1,46 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Cpu, 
-  CheckCircle2, 
-  RefreshCw, 
-  Upload, 
-  Volume2, 
-  Activity, 
-  Sparkles, 
-  FileAudio, 
-  BarChart2, 
-  Info,
-  Car,
-  Hammer,
-  Cog,
-  Bell,
-  Music,
-  Mic,
-  Trees,
-  HelpCircle
-} from 'lucide-react';
 import { audioAPI } from '../services/api';
 
-const CATEGORY_ICONS = {
-  traffic: Car,
-  construction: Hammer,
-  machinery: Cog,
-  alarm: Bell,
-  music: Music,
-  voice: Mic,
-  nature: Trees,
-  unknown: HelpCircle,
-};
-
 const CATEGORY_COLORS = {
-  traffic: '#3b82f6',
-  construction: '#f97316',
-  machinery: '#64748b',
-  alarm: '#ef4444',
-  music: '#8b5cf6',
-  voice: '#ec4899',
-  nature: '#10b981',
-  unknown: '#94a3b8',
+  traffic: '#059669',
+  construction: '#d97706',
+  machinery: '#475569',
+  alarm: '#dc2626',
+  music: '#047857',
+  voice: '#334155',
+  nature: '#059669',
+  unknown: '#64748b',
 };
 
 // Preset acoustic waveforms for instant testing
@@ -49,174 +18,210 @@ function generatePresetAudio(category) {
   const duration = 1.0;
   const n = sr * duration;
   const samples = new Float32Array(n);
-  const t = (i) => i / sr;
 
-  for (let i = 0; i < n; i++) {
-    const time = t(i);
-    let val = 0;
-
-    if (category === 'traffic') {
-      // 55 Hz engine rumble + low friction noise
-      val = 0.5 * Math.sin(2 * Math.PI * 55 * time) + 
-            0.25 * Math.sin(2 * Math.PI * 110 * time) + 
-            (Math.random() - 0.5) * 0.15;
-    } else if (category === 'construction') {
-      // Repetitive sharp impulses (jackhammer at 18 Hz)
-      const period = Math.floor(sr / 18);
-      const mod = i % period;
-      if (mod < 200) {
-        val = (1.0 - mod / 200) * (Math.random() > 0.5 ? 0.9 : -0.9);
-      } else {
-        val = (Math.random() - 0.5) * 0.1;
-      }
-    } else if (category === 'machinery') {
-      // Continuous 60Hz mains harmonic + 520Hz motor whine
-      val = 0.35 * Math.sin(2 * Math.PI * 60 * time) +
-            0.2 * Math.sin(2 * Math.PI * 120 * time) +
-            0.3 * Math.sin(2 * Math.PI * 520 * time) +
-            (Math.random() - 0.5) * 0.05;
-    } else if (category === 'alarm') {
-      // Sweeping frequency siren 800 - 1500 Hz
-      const sweep = 1100 + 400 * Math.sin(2 * Math.PI * 1.5 * time);
-      val = 0.5 * Math.sin(2 * Math.PI * sweep * time);
-    } else if (category === 'music') {
-      // Harmonic chord: A4 (440Hz) + C#5 (554Hz) + E5 (659Hz) + rhythmic bass pulse
-      const beat = Math.sin(2 * Math.PI * 2 * time) > 0.5 ? 0.4 * Math.sin(2 * Math.PI * 80 * time) : 0;
-      val = 0.25 * Math.sin(2 * Math.PI * 440 * time) +
-            0.2 * Math.sin(2 * Math.PI * 554.37 * time) +
-            0.2 * Math.sin(2 * Math.PI * 659.25 * time) + beat;
-    } else if (category === 'voice') {
-      // Human formant modulation: F1 500Hz, F2 1500Hz with 4Hz speech cadence
-      const cadence = Math.max(0, Math.sin(2 * Math.PI * 4 * time));
-      val = cadence * (0.3 * Math.sin(2 * Math.PI * 500 * time) + 0.25 * Math.sin(2 * Math.PI * 1500 * time));
-    } else if (category === 'nature') {
-      // Gentle wind noise + birds
-      const wind = (Math.random() - 0.5) * 0.08;
-      const chirp = (time > 0.3 && time < 0.45) ? 0.3 * Math.sin(2 * Math.PI * 4200 * time) : 0;
-      val = wind + chirp;
-    } else {
-      val = (Math.random() - 0.5) * 0.15;
+  if (category === 'traffic') {
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const lowEngine = Math.sin(2 * Math.PI * 55 * t) * 0.45;
+      const secondHarmonic = Math.sin(2 * Math.PI * 110 * t) * 0.25;
+      const frictionNoise = (Math.random() * 2 - 1) * 0.12;
+      samples[i] = lowEngine + secondHarmonic + frictionNoise;
     }
-
-    samples[i] = Math.max(-1.0, Math.min(1.0, val));
+  } else if (category === 'construction') {
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const impactPeriod = 0.12;
+      const phase = (t % impactPeriod) / impactPeriod;
+      const impactBurst = Math.exp(-phase * 18) * Math.sin(2 * Math.PI * 720 * t) * 0.75;
+      const metalRing = Math.sin(2 * Math.PI * 2400 * t) * Math.exp(-phase * 35) * 0.35;
+      samples[i] = impactBurst + metalRing;
+    }
+  } else if (category === 'machinery') {
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const motorHum = Math.sin(2 * Math.PI * 60 * t) * 0.3;
+      const harmonic3 = Math.sin(2 * Math.PI * 180 * t) * 0.25;
+      const gearWhine = Math.sin(2 * Math.PI * 520 * t) * 0.35;
+      samples[i] = motorHum + harmonic3 + gearWhine;
+    }
+  } else if (category === 'alarm') {
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const sweepFreq = 800 + 600 * Math.sin(2 * Math.PI * 2.0 * t);
+      samples[i] = Math.sin(2 * Math.PI * sweepFreq * t) * 0.7;
+    }
+  } else if (category === 'music') {
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const beatEnv = Math.pow(Math.max(0, Math.sin(2 * Math.PI * 2.0 * t)), 8);
+      const subBass = Math.sin(2 * Math.PI * 80 * t) * beatEnv * 0.55;
+      const midLead = Math.sin(2 * Math.PI * 440 * t) * 0.25;
+      samples[i] = subBass + midLead;
+    }
+  } else if (category === 'voice') {
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      const pitch = 140;
+      const cadence = 0.5 + 0.5 * Math.sin(2 * Math.PI * 3.5 * t);
+      const f1 = Math.sin(2 * Math.PI * 600 * t) * 0.35;
+      const f2 = Math.sin(2 * Math.PI * 1600 * t) * 0.25;
+      samples[i] = (Math.sin(2 * Math.PI * pitch * t) + f1 + f2) * cadence * 0.4;
+    }
+  } else if (category === 'nature') {
+    let last = 0;
+    for (let i = 0; i < n; i++) {
+      const white = Math.random() * 2 - 1;
+      last = 0.95 * last + 0.05 * white;
+      const t = i / sr;
+      const chirp = (t > 0.3 && t < 0.45) ? Math.sin(2 * Math.PI * 3200 * t) * 0.2 : 0;
+      samples[i] = last * 0.3 + chirp;
+    }
+  } else {
+    for (let i = 0; i < n; i++) {
+      samples[i] = (Math.random() * 2 - 1) * 0.25;
+    }
   }
-
-  return Array.from(samples);
+  return samples;
 }
 
-export function AcousticModelCard({ currentWaveform, currentDb }) {
+export function AcousticModelCard() {
   const [modelInfo, setModelInfo] = useState(null);
-  const [activeTab, setActiveTab] = useState('presets'); // 'presets', 'live', 'upload'
+  const [classificationResult, setClassificationResult] = useState(null);
+  const [featureVector, setFeatureVector] = useState(null);
   const [selectedPreset, setSelectedPreset] = useState('traffic');
   const [isLoading, setIsLoading] = useState(false);
   const [isRetraining, setIsRetraining] = useState(false);
-  const [classificationResult, setClassificationResult] = useState(null);
+  const [retrainSuccess, setRetrainSuccess] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [activeTab, setActiveTab] = useState('presets'); // 'presets', 'live', 'upload'
   const [uploadFile, setUploadFile] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [retrainSuccess, setRetrainSuccess] = useState(null);
 
   // Fetch model metadata on load
-  const fetchModelInfo = async () => {
+  useEffect(() => {
+    fetchModelMetadata();
+  }, []);
+
+  const fetchModelMetadata = async () => {
     try {
       const res = await audioAPI.getModelInfo();
       setModelInfo(res.data);
     } catch (err) {
-      console.error('Failed to load model info:', err);
+      console.warn('Failed to load model metadata:', err);
     }
   };
 
-  useEffect(() => {
-    fetchModelInfo();
-  }, []);
-
-  // Run classification on preset sound
+  // Run classification on selected preset
   const handleClassifyPreset = async (category) => {
     setSelectedPreset(category);
     setIsLoading(true);
-    setErrorMsg(null);
+    setErrorMsg('');
+    setRetrainSuccess('');
+
     try {
       const samples = generatePresetAudio(category);
-      const res = await audioAPI.classify(samples, 22050);
+      const res = await audioAPI.classify(Array.from(samples), 22050, false);
       setClassificationResult(res.data);
+      setFeatureVector(res.data.features);
     } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Classification failed');
+      setErrorMsg(err.response?.data?.detail || 'Classification request failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Run classification on live stream buffer
-  const handleClassifyLiveStream = async () => {
-    setIsLoading(true);
-    setErrorMsg(null);
-    try {
-      // Expand 64-point visualizer waveform or create live frame
-      const samples = currentWaveform && currentWaveform.length > 0
-        ? currentWaveform.flatMap(v => new Array(345).fill(v)) // synthesize 22k samples
-        : generatePresetAudio('machinery');
-      const res = await audioAPI.classify(samples, 22050);
-      setClassificationResult(res.data);
-    } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Live classification failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle file upload classification
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadFile(file);
-    setIsLoading(true);
-    setErrorMsg(null);
-    try {
-      const res = await audioAPI.uploadAndClassify(file);
-      setClassificationResult(res.data);
-    } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Failed to analyze uploaded audio');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Trigger retraining of the Random Forest
+  // Trigger retraining of RandomForest model
   const handleRetrain = async () => {
     setIsRetraining(true);
-    setRetrainSuccess(null);
-    setErrorMsg(null);
+    setErrorMsg('');
+    setRetrainSuccess('');
+
     try {
       const res = await audioAPI.retrain(250, 150);
-      await fetchModelInfo();
-      setRetrainSuccess(`Model retrained successfully! New Test Accuracy: ${(res.data.metrics.test_accuracy * 100).toFixed(1)}%`);
-      setTimeout(() => setRetrainSuccess(null), 6000);
+      setRetrainSuccess(
+        `Model retrained successfully! 5-fold CV Accuracy: ${(res.data.metrics.cv_mean_accuracy * 100).toFixed(1)}%`
+      );
+      await fetchModelMetadata();
     } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Model retraining failed');
+      setErrorMsg(err.response?.data?.detail || 'Retraining failed');
     } finally {
       setIsRetraining(false);
     }
   };
 
+  // Upload custom WAV file
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadFile(file);
+    setIsLoading(true);
+    setErrorMsg('');
+    setRetrainSuccess('');
+
+    try {
+      const res = await audioAPI.uploadAndClassify(file);
+      setClassificationResult(res.data);
+      setFeatureVector(res.data.features);
+    } catch (err) {
+      setErrorMsg(err.response?.data?.detail || 'File processing failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Live microphone capture classification
+  const handleClassifyLiveStream = async () => {
+    setIsLoading(true);
+    setErrorMsg('');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      const buffer = new Float32Array(analyser.fftSize);
+      setTimeout(async () => {
+        analyser.getFloatTimeDomainData(buffer);
+        stream.getTracks().forEach(t => t.stop());
+        audioCtx.close();
+
+        try {
+          const res = await audioAPI.classify(Array.from(buffer), 22050, false);
+          setClassificationResult(res.data);
+          setFeatureVector(res.data.features);
+        } catch (err) {
+          setErrorMsg('Live stream classification error');
+        } finally {
+          setIsLoading(false);
+        }
+      }, 1000);
+
+    } catch (err) {
+      setErrorMsg('Microphone permission required for live stream inference');
+      setIsLoading(false);
+    }
+  };
+
   const currentCategory = classificationResult?.category || 'traffic';
-  const CategoryIcon = CATEGORY_ICONS[currentCategory] || HelpCircle;
 
   return (
-    <div className="glass-card p-6 rounded-3xl border border-[#cbd5e1] bg-white shadow-xs space-y-6">
+    <div className="bg-white p-6 rounded-3xl border border-[#cbd5e1] shadow-xs space-y-6">
       
-      {/* ── Header: Model Provenance & Status Badge ── */}
+      {/* ── Header: Model Provenance & Status Badge (Zero Icons) ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#f1f5f9]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 bg-[#ecfdf5] text-[#059669] rounded-xl">
-              <Cpu className="w-5 h-5" />
+            <span className="badge-emerald font-mono font-bold text-[10px]">
+              ACOUSTIC ML
             </span>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-[#0f172a]">
                   Acoustic Event Machine Learning Model
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" />
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0]">
                   Real Trained Model (Active)
                 </span>
               </div>
@@ -246,55 +251,50 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
           <button
             onClick={handleRetrain}
             disabled={isRetraining}
-            className="btn btn-secondary btn-sm text-xs font-bold rounded-2xl flex items-center gap-1.5 shrink-0"
+            className="btn btn-secondary btn-sm text-xs font-bold rounded-2xl shrink-0"
             title="Retrain Random Forest on synthetic acoustic dataset"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRetraining ? 'animate-spin text-[#059669]' : ''}`} />
-            {isRetraining ? 'Retraining...' : 'Retrain'}
+            {isRetraining ? 'Retraining...' : 'Retrain Pipeline'}
           </button>
         </div>
       </div>
 
       {retrainSuccess && (
-        <div className="p-3 bg-[#ecfdf5] border border-[#a7f3d0] text-[#065f46] text-xs rounded-2xl flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
-          <span>{retrainSuccess}</span>
+        <div className="p-3 bg-[#ecfdf5] border border-[#a7f3d0] text-[#065f46] text-xs rounded-2xl font-semibold">
+          {retrainSuccess}
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs rounded-2xl">
+        <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs rounded-2xl font-semibold">
           {errorMsg}
         </div>
       )}
 
-      {/* ── Mode Selection Tabs ── */}
+      {/* ── Mode Selection Tabs (Zero Icons) ── */}
       <div className="flex items-center gap-2 border-b border-[#e2e8f0] pb-2">
         <button
           onClick={() => setActiveTab('presets')}
-          className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-colors ${
             activeTab === 'presets' ? 'bg-[#059669] text-white' : 'text-[#475569] hover:bg-[#f1f5f9]'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
           Acoustic Presets Lab
         </button>
         <button
           onClick={() => setActiveTab('live')}
-          className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-colors ${
             activeTab === 'live' ? 'bg-[#059669] text-white' : 'text-[#475569] hover:bg-[#f1f5f9]'
           }`}
         >
-          <Activity className="w-3.5 h-3.5" />
           Live Stream Capture
         </button>
         <button
           onClick={() => setActiveTab('upload')}
-          className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-colors ${
             activeTab === 'upload' ? 'bg-[#059669] text-white' : 'text-[#475569] hover:bg-[#f1f5f9]'
           }`}
         >
-          <Upload className="w-3.5 h-3.5" />
           WAV File Upload
         </button>
       </div>
@@ -307,16 +307,15 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { id: 'traffic', label: 'Traffic & Tires', desc: '55Hz rumble + friction', icon: Car, color: '#3b82f6' },
-              { id: 'construction', label: 'Jackhammer', desc: 'Percussive impact bursts', icon: Hammer, color: '#f97316' },
-              { id: 'machinery', label: 'Electric Motor', desc: '60Hz hum + 520Hz whine', icon: Cog, color: '#64748b' },
-              { id: 'alarm', label: 'Emergency Siren', desc: 'FM sinusoidal sweep', icon: Bell, color: '#ef4444' },
-              { id: 'music', label: 'Loud Music / Bass', desc: 'Harmonics + rhythmic beat', icon: Music, color: '#8b5cf6' },
-              { id: 'voice', label: 'Human Speech', desc: 'Formants F1/F2 + cadence', icon: Mic, color: '#ec4899' },
-              { id: 'nature', label: 'Park & Wind', desc: 'Filtered wind + bird chirp', icon: Trees, color: '#10b981' },
-              { id: 'unknown', label: 'Ambient White Noise', desc: 'Diffuse non-tonal noise', icon: HelpCircle, color: '#94a3b8' },
+              { id: 'traffic', label: 'Traffic & Tires', desc: '55Hz rumble + friction' },
+              { id: 'construction', label: 'Jackhammer', desc: 'Percussive impact bursts' },
+              { id: 'machinery', label: 'Electric Motor', desc: '60Hz hum + 520Hz whine' },
+              { id: 'alarm', label: 'Emergency Siren', desc: 'FM sinusoidal sweep' },
+              { id: 'music', label: 'Loud Music / Bass', desc: 'Harmonics + rhythmic beat' },
+              { id: 'voice', label: 'Human Speech', desc: 'Formants F1/F2 + cadence' },
+              { id: 'nature', label: 'Park & Wind', desc: 'Filtered wind + bird chirp' },
+              { id: 'unknown', label: 'Ambient Noise', desc: 'Diffuse non-tonal noise' },
             ].map(preset => {
-              const Icon = preset.icon;
               const isSelected = selectedPreset === preset.id;
               return (
                 <button
@@ -329,11 +328,9 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
                       : 'border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f1f5f9]'
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="p-1 rounded-lg bg-white shadow-2xs" style={{ color: preset.color }}>
-                      <Icon className="w-4 h-4" />
-                    </span>
+                  <div className="flex items-center justify-between mb-1">
                     <span className="font-bold text-xs text-[#0f172a] capitalize">{preset.label}</span>
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[preset.id] || '#059669' }} />
                   </div>
                   <span className="text-[10px] text-[#64748b] block">{preset.desc}</span>
                 </button>
@@ -355,9 +352,8 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
           <button
             onClick={handleClassifyLiveStream}
             disabled={isLoading}
-            className="btn btn-primary btn-sm text-xs font-bold rounded-2xl shrink-0 flex items-center gap-2"
+            className="btn btn-primary btn-sm text-xs font-bold rounded-2xl shrink-0 px-4"
           >
-            <Activity className="w-4 h-4" />
             {isLoading ? 'Processing...' : 'Classify Stream'}
           </button>
         </div>
@@ -373,9 +369,8 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
                 Upload a standard PCM WAV recording (e.g. from handheld sound meter, smartphone, or field sensor).
               </p>
             </div>
-            <label className="btn btn-primary btn-sm text-xs font-bold rounded-2xl cursor-pointer flex items-center gap-2 shrink-0">
-              <Upload className="w-4 h-4" />
-              <span>Choose .WAV</span>
+            <label className="btn btn-primary btn-sm text-xs font-bold rounded-2xl cursor-pointer shrink-0 px-4">
+              <span>Choose .WAV File</span>
               <input
                 type="file"
                 accept=".wav,audio/wav"
@@ -385,25 +380,24 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
             </label>
           </div>
           {uploadFile && (
-            <div className="text-xs text-[#059669] flex items-center gap-1.5 font-mono">
-              <FileAudio className="w-4 h-4" />
-              <span>Loaded: {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)</span>
+            <div className="text-xs text-[#059669] font-mono font-bold">
+              Loaded: {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
             </div>
           )}
         </div>
       )}
 
-      {/* ── Classification Results Display ── */}
+      {/* ── Classification Results Display (Zero Icons) ── */}
       {classificationResult && (
         <div className="p-5 rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div 
-                className="p-3 rounded-2xl text-white shadow-xs"
+              <span 
+                className="px-3 py-1.5 rounded-xl font-mono text-xs font-extrabold uppercase text-white shadow-xs"
                 style={{ backgroundColor: CATEGORY_COLORS[currentCategory] || '#059669' }}
               >
-                <CategoryIcon className="w-6 h-6" />
-              </div>
+                {currentCategory}
+              </span>
               <div>
                 <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
                   Identified Sound Category
@@ -454,79 +448,22 @@ export function AcousticModelCard({ currentWaveform, currentDb }) {
             </div>
           </div>
 
-          {/* Extracted Acoustic Feature Metrics */}
-          {classificationResult.features && (
+          {/* Feature Vector Table */}
+          {featureVector && (
             <div className="pt-2 border-t border-[#e2e8f0]">
-              <span className="text-[11px] font-bold text-[#475569] block mb-2">
-                Standardized Acoustic Feature Vector
+              <span className="text-[11px] font-bold text-[#475569] block mb-1">
+                Extracted 11-Dimensional Acoustic Feature Vector
               </span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="p-2.5 rounded-xl bg-white border border-[#e2e8f0]">
-                  <span className="text-[10px] font-bold text-[#64748b] block">Spectral Centroid</span>
-                  <span className="font-mono text-xs font-bold text-[#0f172a]">
-                    {classificationResult.features.spectral_centroid} Hz
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-white border border-[#e2e8f0]">
-                  <span className="text-[10px] font-bold text-[#64748b] block">Spectral Rolloff</span>
-                  <span className="font-mono text-xs font-bold text-[#0f172a]">
-                    {classificationResult.features.spectral_rolloff} Hz
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-white border border-[#e2e8f0]">
-                  <span className="text-[10px] font-bold text-[#64748b] block">Temporal Crest</span>
-                  <span className="font-mono text-xs font-bold text-[#0f172a]">
-                    {classificationResult.features.temporal_crest || '3.2'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-white border border-[#e2e8f0]">
-                  <span className="text-[10px] font-bold text-[#64748b] block">Band Distribution</span>
-                  <span className="font-mono text-xs font-bold text-[#059669]">
-                    L: {Math.round((classificationResult.features.low_band_ratio || 0.4) * 100)}% / M: {Math.round((classificationResult.features.mid_band_ratio || 0.4) * 100)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Inference Notes */}
-          {classificationResult.notes && classificationResult.notes.length > 0 && (
-            <div className="p-3 bg-white rounded-xl border border-[#e2e8f0] text-xs text-[#475569] space-y-1">
-              <div className="flex items-center gap-1.5 font-bold text-[#0f172a]">
-                <Info className="w-3.5 h-3.5 text-[#059669]" />
-                <span>Model Inference Explanations:</span>
-              </div>
-              <ul className="list-disc list-inside space-y-0.5 text-[11px] text-[#475569] pl-1">
-                {classificationResult.notes.map((note, idx) => (
-                  <li key={idx}>{note}</li>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                {Object.entries(featureVector).map(([k, v]) => (
+                  <div key={k} className="p-2 bg-white rounded-xl border border-[#e2e8f0]">
+                    <span className="text-[10px] text-[#64748b] block capitalize">{k.replace(/_/g, ' ')}</span>
+                    <span className="font-bold text-[#0f172a]">{typeof v === 'number' ? v.toFixed(3) : v}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* ── Feature Importance Distribution ── */}
-      {modelInfo?.feature_importances && (
-        <div className="pt-2">
-          <div className="flex items-center justify-between text-xs text-[#475569] mb-2 font-bold">
-            <span className="flex items-center gap-1.5">
-              <BarChart2 className="w-3.5 h-3.5 text-[#059669]" />
-              Top Discriminative Acoustic Features (Random Forest Gini Importance)
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {Object.entries(modelInfo.feature_importances).slice(0, 4).map(([feat, imp]) => (
-              <div key={feat} className="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl text-xs">
-                <span className="text-[10px] text-[#64748b] font-medium block truncate capitalize">
-                  {feat.replace(/_/g, ' ')}
-                </span>
-                <span className="font-mono font-bold text-[#0f172a]">
-                  {(imp * 100).toFixed(1)}% importance
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 

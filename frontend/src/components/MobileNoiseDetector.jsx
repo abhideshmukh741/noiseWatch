@@ -1,41 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Navigation, 
-  Mic, 
-  MicOff, 
-  AlertTriangle, 
-  CheckCircle2, 
-  ShieldAlert, 
-  FileText, 
-  Send, 
-  MapPin, 
-  Clock, 
-  Volume2, 
-  Info,
-  Car,
-  Hammer,
-  Cog,
-  Bell,
-  Music,
-  Trees,
-  HelpCircle,
-  ChevronDown,
-  Sparkles,
-  Copy,
-  Check
-} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { audioAPI, reportsAPI } from '../services/api';
 
-const CATEGORY_ICONS = {
-  traffic: Car,
-  construction: Hammer,
-  machinery: Cog,
-  alarm: Bell,
-  music: Music,
-  voice: Mic,
-  nature: Trees,
-  unknown: HelpCircle,
+const CATEGORY_NAMES = {
+  traffic: 'Traffic & Vehicle Noise',
+  construction: 'Construction Equipment',
+  machinery: 'Industrial Machinery',
+  alarm: 'Siren or Alarm',
+  music: 'Public Sound / Loudspeaker',
+  voice: 'Crowd or Speech',
+  nature: 'Environmental Ambient',
+  unknown: 'Unclassified Acoustic',
 };
 
 export function MobileNoiseDetector() {
@@ -43,51 +18,36 @@ export function MobileNoiseDetector() {
   const [gpsStatus, setGpsStatus] = useState('detecting'); // 'detecting', 'locked', 'denied'
   const [zoneData, setZoneData] = useState(null);
   const [selectedZone, setSelectedZone] = useState('residential');
+  
+  // Real-time audio stream state
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [currentPhoneDb, setCurrentPhoneDb] = useState(42.5);
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingCountdown, setRecordingCountdown] = useState(0);
-  const [currentPhoneDb, setCurrentPhoneDb] = useState(48.5);
+  const [recordingCountdown, setRecordingCountdown] = useState(3);
   const [evaluating, setEvaluating] = useState(false);
+  
+  // Results
   const [verdictResult, setVerdictResult] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [aiNarrative, setAiNarrative] = useState(null);
   const [generatingAi, setGeneratingAi] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [copiedLetter, setCopiedLetter] = useState(false);
 
+  // Audio nodes & refs
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const streamRef = useRef(null);
-  const audioBufferRef = useRef([]);
   const animFrameRef = useRef(null);
 
-  const handleGenerateAiNarrative = async () => {
-    if (!verdictResult) return;
-    setGeneratingAi(true);
-    try {
-      const res = await reportsAPI.generateAINarrative({
-        measured_db: verdictResult.measured_db,
-        threshold_db: verdictResult.threshold_db,
-        zone_category: verdictResult.zone_category,
-        time_period: verdictResult.time_period,
-        sound_classification: verdictResult.sound_classification,
-        confidence: verdictResult.confidence,
-        address: verdictResult.address,
-        incident_id: verdictResult.incident_id,
-        duration_seconds: 3.0,
-      });
-      setAiNarrative(res.data);
-    } catch (err) {
-      console.error('Failed to generate AI narrative:', err);
-    } finally {
-      setGeneratingAi(false);
-    }
-  };
+  // Calibration offset (phone mic input to dBA SPL baseline)
+  const CALIBRATION_OFFSET_DB = 88.0;
 
-  const handleCopyLetter = () => {
-    if (!aiNarrative?.formal_complaint_letter) return;
-    navigator.clipboard.writeText(aiNarrative.formal_complaint_letter);
-    setCopiedLetter(true);
-    setTimeout(() => setCopiedLetter(false), 3000);
-  };
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopPhoneMic();
+    };
+  }, []);
 
   // 1. Acquire Phone GPS on Mount
   useEffect(() => {
@@ -140,60 +100,65 @@ export function MobileNoiseDetector() {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
-    setIsRecording(false);
+    setIsMonitoring(false);
   };
 
-  // 3. Start Recording & Audio Analysis via Web Audio API
+  // 3. Start Recording 3-Second Evidence Sample via Phone Mic
   const handleRecordMobileEvidence = async () => {
-    setErrorMsg(null);
+    setErrorMsg('');
     setVerdictResult(null);
-    audioBufferRef.current = [];
+    setAiNarrative(null);
+    setIsRecording(true);
+    setRecordingCountdown(3);
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
       });
+
       streamRef.current = stream;
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioContextRef.current = audioCtx;
 
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      const ctx = new AudioCtx({ sampleRate: 22050 });
-      audioContextRef.current = ctx;
-
-      const source = ctx.createMediaStreamSource(stream);
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 1024;
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
       source.connect(analyser);
       analyserRef.current = analyser;
 
-      setIsRecording(true);
-      setRecordingCountdown(3);
+      setIsMonitoring(true);
 
       const capturedSamples = [];
       const dbSamples = [];
+      const buffer = new Float32Array(analyser.fftSize);
 
-      const processFrame = () => {
+      const updateMeter = () => {
         if (!analyserRef.current) return;
-        const buffer = new Float32Array(analyserRef.current.fftSize);
         analyserRef.current.getFloatTimeDomainData(buffer);
 
-        // Calculate RMS & Decibels
-        let sum = 0;
+        let sumSquares = 0.0;
         for (let i = 0; i < buffer.length; i++) {
-          sum += buffer[i] * buffer[i];
+          sumSquares += buffer[i] * buffer[i];
           capturedSamples.push(buffer[i]);
         }
-        const rms = Math.sqrt(sum / buffer.length);
-        const estDb = rms > 0.00001 ? Math.min(Math.max(20 * Math.log10(rms) + 94.0, 32.0), 115.0) : 32.0;
-        const roundedDb = Math.round(estDb * 10) / 10;
-        setCurrentPhoneDb(roundedDb);
-        dbSamples.push(roundedDb);
+        const rms = Math.sqrt(sumSquares / buffer.length);
+        const calculatedDb = rms > 0.00001
+          ? Math.min(125.0, Math.max(30.0, Math.round((20 * Math.log10(rms) + CALIBRATION_OFFSET_DB) * 10) / 10))
+          : 35.0;
 
-        animFrameRef.current = requestAnimationFrame(processFrame);
+        setCurrentPhoneDb(calculatedDb);
+        dbSamples.push(calculatedDb);
+
+        animFrameRef.current = requestAnimationFrame(updateMeter);
       };
 
-      processFrame();
+      updateMeter();
 
-      // Countdown loop for 3 seconds recording
+      // Countdown loop for 3 seconds
       let secondsLeft = 3;
       const timer = setInterval(() => {
         secondsLeft -= 1;
@@ -256,17 +221,50 @@ export function MobileNoiseDetector() {
   const isNight = zoneData?.time_period === 'night';
   const activeLegalLimit = isNight ? currentZoneLimit.night_threshold_dba : currentZoneLimit.day_threshold_dba;
 
-  const VerdictCategoryIcon = verdictResult ? (CATEGORY_ICONS[verdictResult.sound_classification] || Volume2) : Volume2;
+  // 5. Generate AI Court-Admissible Narrative via Groq
+  const handleGenerateAiNarrative = async () => {
+    if (!verdictResult) return;
+    setGeneratingAi(true);
+    try {
+      const payload = {
+        measured_db: verdictResult.measured_db,
+        threshold_db: verdictResult.threshold_db,
+        zone_category: selectedZone,
+        time_period: verdictResult.time_period || (isNight ? 'night' : 'day'),
+        sound_classification: verdictResult.sound_classification,
+        confidence: verdictResult.confidence,
+        address: zoneData?.address || `${gpsLocation.lat.toFixed(4)}, ${gpsLocation.lon.toFixed(4)}`,
+        incident_id: verdictResult.incident_id,
+        duration_seconds: 3.0,
+      };
+
+      const res = await reportsAPI.generateAINarrative(payload);
+      setAiNarrative(res.data);
+    } catch (err) {
+      console.error('Failed to generate AI narrative:', err);
+      setErrorMsg('Failed to reach Groq AI. Generating rule-based legal report instead.');
+    } finally {
+      setGeneratingAi(false);
+    }
+  };
+
+  const handleCopyLetter = () => {
+    if (aiNarrative?.formal_complaint_letter) {
+      navigator.clipboard.writeText(aiNarrative.formal_complaint_letter);
+      setCopiedLetter(true);
+      setTimeout(() => setCopiedLetter(false), 2500);
+    }
+  };
 
   return (
-    <div className="glass-card p-6 rounded-3xl border border-[#cbd5e1] bg-white shadow-xs space-y-6">
+    <div className="bg-white p-6 rounded-3xl border border-[#cbd5e1] shadow-xs space-y-6">
       
-      {/* ── Title Banner ── */}
+      {/* ── Title Banner (Zero Icons) ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#f1f5f9]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 bg-[#ecfdf5] text-[#059669] rounded-xl">
-              <Navigation className="w-5 h-5" />
+            <span className="badge-emerald font-mono font-bold text-[10px]">
+              MOBILE GPS
             </span>
             <div>
               <h2 className="text-base font-bold text-[#0f172a]">
@@ -279,11 +277,11 @@ export function MobileNoiseDetector() {
           </div>
         </div>
 
-        {/* GPS Status Indicator */}
+        {/* GPS Status Indicator (Zero Icons) */}
         <div className="flex items-center gap-2 text-xs font-mono font-bold px-3 py-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl">
-          <MapPin className="w-3.5 h-3.5 text-[#059669]" />
+          <span className="text-[#059669]">GPS:</span>
           <span>
-            {gpsStatus === 'locked' ? 'GPS Locked' : (gpsStatus === 'detecting' ? 'Locating...' : 'Mumbai Baseline')}
+            {gpsStatus === 'locked' ? 'Locked' : (gpsStatus === 'detecting' ? 'Locating...' : 'India Baseline')}
           </span>
           <span className="text-[#64748b]">
             ({gpsLocation.lat.toFixed(4)}°, {gpsLocation.lon.toFixed(4)}°)
@@ -292,65 +290,74 @@ export function MobileNoiseDetector() {
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs rounded-2xl flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>{errorMsg}</span>
+        <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs rounded-2xl flex items-center justify-between">
+          <span className="font-semibold">{errorMsg}</span>
+          <button onClick={() => setErrorMsg('')} className="text-xs font-bold underline ml-2">Dismiss</button>
         </div>
       )}
 
-      {/* ── Zoning & Statutory Limit Selector ── */}
+      {/* ── Location & Zone Summary (Solid Background, No Mirror Filter) ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        {/* Detected Address & Landuse */}
-        <div className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] md:col-span-2 space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-[#64748b] font-bold">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#059669]" />
-              Physical Geolocation (Reverse-Geocoded)
-            </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0]">
-              OpenStreetMap GIS
-            </span>
-          </div>
-          <p className="text-xs font-semibold text-[#0f172a] line-clamp-2">
-            {zoneData?.address || 'Greenfield Colony, Sector 12, Mumbai Metropolitan Region'}
+        {/* Address & Detected Locality */}
+        <div className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b] block">
+            Audited Locality (India)
+          </span>
+          <p className="text-xs font-bold text-[#0f172a] truncate">
+            {zoneData?.address || 'Detecting via OpenStreetMap...'}
           </p>
-          <div className="flex items-center gap-2 pt-1 text-[11px] text-[#475569]">
-            <Clock className="w-3.5 h-3.5 text-[#64748b]" />
-            <span>Time of Audit: <strong className="text-[#0f172a] capitalize">{zoneData?.time_period || 'Day'} Hours</strong> ({isNight ? '22:00 – 06:00' : '06:00 – 22:00'})</span>
-          </div>
+          <span className="text-[11px] text-[#475569] block">
+            Reverse-Geocoded GPS Coordinate
+          </span>
         </div>
 
-        {/* Zone Category Selector */}
-        <div className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block mb-1">
-              Statutory Zone Category
-            </span>
+        {/* Detected Zone with Override Selector */}
+        <div className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b] block">
+            CPCB Statutory Zone
+          </span>
+          <div className="flex items-center gap-2">
             <select
               value={selectedZone}
               onChange={(e) => setSelectedZone(e.target.value)}
-              className="w-full text-xs font-bold text-[#0f172a] bg-white border border-[#cbd5e1] rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-[#059669]"
+              className="bg-white border border-[#cbd5e1] rounded-xl text-xs font-bold text-[#0f172a] px-2.5 py-1 focus:ring-1 focus:ring-[#059669] outline-none"
             >
-              <option value="residential">Residential Area (55 / 45 dB)</option>
-              <option value="silence_zone">Silence Zone (50 / 40 dB)</option>
-              <option value="commercial">Commercial Area (65 / 55 dB)</option>
-              <option value="industrial">Industrial Area (75 / 70 dB)</option>
+              <option value="residential">Residential Area (55/45 dB)</option>
+              <option value="commercial">Commercial Area (65/55 dB)</option>
+              <option value="industrial">Industrial Area (75/70 dB)</option>
+              <option value="silence_zone">Silence Zone (50/40 dB)</option>
             </select>
           </div>
+          <span className="text-[11px] text-[#64748b] block">
+            {currentZoneLimit.legal_reference}
+          </span>
+        </div>
 
-          <div className="mt-2 pt-2 border-t border-[#e2e8f0] flex items-center justify-between text-xs">
-            <span className="text-[#64748b] font-medium">Statutory Limit:</span>
-            <span className="font-mono font-bold text-[#059669]">
-              {activeLegalLimit} dB(A)
+        {/* Time of Day & Statutory Curfew Status */}
+        <div className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b] block">
+            Statutory Time Period
+          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#0f172a] uppercase">
+              {zoneData ? `${zoneData.time_period} Period (${zoneData.current_hour}:00 IST)` : 'Current Hour'}
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
+              isNight ? 'bg-[#fef3c7] text-[#b45309] border border-[#fde68a]' : 'bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0]'
+            }`}>
+              {isNight ? 'Rule 5 Curfew Active' : 'Daytime Standards'}
             </span>
           </div>
+          <span className="text-[11px] text-[#475569] block">
+            Night Limit applies 22:00 – 06:00 IST
+          </span>
         </div>
 
       </div>
 
-      {/* ── Record Audio Evidence Action ── */}
-      <div className="p-6 rounded-3xl border border-[#cbd5e1] bg-gradient-to-b from-[#f8fafc] to-[#ffffff] text-center space-y-4">
+      {/* ── Record Audio Evidence Action (Solid Card, Zero Icons) ── */}
+      <div className="p-6 rounded-3xl border border-[#cbd5e1] bg-[#f8fafc] text-center space-y-4">
         
         <div>
           <span className="text-xs uppercase font-mono font-bold text-[#64748b] block mb-1">
@@ -367,42 +374,33 @@ export function MobileNoiseDetector() {
           </p>
         </div>
 
-        {/* Big Record Button */}
+        {/* Record Button without icons */}
         <div className="flex flex-col items-center justify-center">
           <button
             onClick={handleRecordMobileEvidence}
             disabled={isRecording || evaluating}
-            className={`px-6 py-3.5 rounded-full font-bold text-sm text-white shadow-md transition-all flex items-center gap-2.5 ${
+            className={`px-8 py-3.5 rounded-full font-bold text-sm text-white shadow-md transition-all ${
               isRecording 
                 ? 'bg-[#ef4444] animate-pulse ring-4 ring-[#fecaca]' 
                 : 'bg-[#059669] hover:bg-[#047857]'
             }`}
           >
             {isRecording ? (
-              <>
-                <Mic className="w-5 h-5 animate-bounce" />
-                <span>Capturing Evidence... ({recordingCountdown}s)</span>
-              </>
+              <span>Capturing Audio Evidence... ({recordingCountdown}s)</span>
             ) : evaluating ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Running ML & Legal Audit...</span>
-              </>
+              <span>Running ML & Legal Audit...</span>
             ) : (
-              <>
-                <Mic className="w-5 h-5" />
-                <span>Record Audio Evidence (3s Audit)</span>
-              </>
+              <span>Record Audio Evidence (3s Audit)</span>
             )}
           </button>
           <span className="text-[10px] text-[#94a3b8] mt-2">
-            Tap to record a 3-second calibrated audio clip and evaluate against statutory limits
+            Tap to record a 3-second calibrated audio clip and evaluate against statutory Indian limits
           </span>
         </div>
 
       </div>
 
-      {/* ── Verdict Card: Display Results ── */}
+      {/* ── Verdict Card: Display Results (Zero Icons) ── */}
       {verdictResult && (
         <div className={`p-6 rounded-3xl border space-y-4 ${
           verdictResult.is_pollution_violation 
@@ -413,17 +411,13 @@ export function MobileNoiseDetector() {
           {/* Header Verdict Status */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-2xl text-white ${
+              <span className={`px-3 py-1.5 rounded-xl font-mono text-xs font-extrabold uppercase text-white ${
                 verdictResult.is_pollution_violation 
                   ? 'bg-[#dc2626]' 
                   : (verdictResult.is_exempt ? 'bg-[#2563eb]' : 'bg-[#059669]')
               }`}>
-                {verdictResult.is_pollution_violation ? (
-                  <ShieldAlert className="w-6 h-6" />
-                ) : (
-                  <CheckCircle2 className="w-6 h-6" />
-                )}
-              </div>
+                {verdictResult.is_pollution_violation ? 'VIOLATION' : 'COMPLIANT'}
+              </span>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider block text-[#64748b]">
                   Audit Verdict
@@ -476,9 +470,8 @@ export function MobileNoiseDetector() {
 
             <div className="p-2.5 rounded-xl bg-white border border-[#e2e8f0]">
               <span className="text-[10px] font-bold text-[#64748b] block">ML Classified Source</span>
-              <span className="font-bold text-xs text-[#0f172a] capitalize flex items-center gap-1">
-                <VerdictCategoryIcon className="w-3.5 h-3.5 text-[#059669]" />
-                {verdictResult.sound_classification} ({Math.round(verdictResult.confidence * 100)}%)
+              <span className="font-bold text-xs text-[#0f172a] capitalize block">
+                {CATEGORY_NAMES[verdictResult.sound_classification] || verdictResult.sound_classification} ({Math.round(verdictResult.confidence * 100)}%)
               </span>
             </div>
           </div>
@@ -486,28 +479,18 @@ export function MobileNoiseDetector() {
           {/* AI Legal Analysis Trigger Button */}
           {verdictResult.is_pollution_violation && !aiNarrative && (
             <div className="p-3 bg-white rounded-2xl border border-[#e2e8f0] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
+              <div>
+                <span className="badge-emerald text-[10px] font-mono mr-2">AI COMPLIANCE</span>
                 <span className="text-xs font-bold text-[#0f172a]">
-                  Generate AI Court-Admissible Legal Assessment & Complaint Letter
+                  Generate Court-Admissible Legal Assessment & Complaint Letter
                 </span>
               </div>
               <button
                 onClick={handleGenerateAiNarrative}
                 disabled={generatingAi}
-                className="btn btn-primary btn-sm text-xs font-bold rounded-xl flex items-center gap-2 shrink-0 bg-[#8b5cf6] hover:bg-[#7c3aed] border-none text-white"
+                className="btn btn-primary btn-sm text-xs font-bold rounded-xl shrink-0 bg-[#059669] hover:bg-[#047857] border-none text-white px-4"
               >
-                {generatingAi ? (
-                  <>
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Analyzing with Groq AI...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Draft AI Legal Dossier</span>
-                  </>
-                )}
+                {generatingAi ? 'Analyzing with Groq AI...' : 'Draft AI Legal Dossier'}
               </button>
             </div>
           )}
@@ -516,11 +499,10 @@ export function MobileNoiseDetector() {
           {aiNarrative && (
             <div className="p-4 bg-white rounded-2xl border border-[#cbd5e1] space-y-3 shadow-xs">
               <div className="flex items-center justify-between pb-2 border-b border-[#f1f5f9]">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#0f172a]">
-                  <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
-                  <span>AI Legal & Statutory Assessment (Groq {aiNarrative.ai_model || 'gpt-oss-120b'})</span>
+                <div className="text-xs font-bold text-[#0f172a]">
+                  <span>AI Legal & Statutory Assessment (Groq {aiNarrative.ai_model || 'qwen/qwen3.8-27b'})</span>
                 </div>
-                <span className="text-[10px] font-mono bg-[#f5f3ff] text-[#7c3aed] px-2 py-0.5 rounded-full border border-[#ddd6fe]">
+                <span className="text-[10px] font-mono bg-[#ecfdf5] text-[#047857] px-2.5 py-0.5 rounded-full border border-[#a7f3d0] font-bold">
                   Court-Admissible Draft
                 </span>
               </div>
@@ -544,7 +526,7 @@ export function MobileNoiseDetector() {
               {/* Health Impact */}
               {aiNarrative.health_impact && (
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] block">WHO Health Impact Criteria</span>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] block">Health Impact Criteria</span>
                   <p className="text-xs text-[#475569] mt-0.5 leading-relaxed">
                     {aiNarrative.health_impact}
                   </p>
@@ -568,14 +550,13 @@ export function MobileNoiseDetector() {
                 <div className="pt-2 border-t border-[#f1f5f9]">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] uppercase font-bold text-[#64748b]">
-                      Formal Municipal Complaint Letter
+                      Formal Municipal Complaint Letter (India)
                     </span>
                     <button
                       onClick={handleCopyLetter}
-                      className="text-xs font-bold text-[#059669] hover:underline flex items-center gap-1"
+                      className="text-xs font-bold text-[#059669] hover:underline"
                     >
-                      {copiedLetter ? <Check className="w-3.5 h-3.5 text-[#059669]" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedLetter ? 'Copied to Clipboard!' : 'Copy Letter'}</span>
+                      {copiedLetter ? 'Copied to Clipboard!' : 'Copy Letter'}
                     </button>
                   </div>
                   <pre className="text-[11px] bg-[#f8fafc] border border-[#e2e8f0] p-3 rounded-xl text-[#334155] whitespace-pre-wrap font-sans max-h-48 overflow-y-auto">
@@ -586,22 +567,20 @@ export function MobileNoiseDetector() {
             </div>
           )}
 
-          {/* Action CTAs */}
+          {/* Action CTAs (Zero Icons) */}
           {verdictResult.is_pollution_violation && (
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
               <Link
                 to={`/reports?incident_id=${verdictResult.incident_id}`}
-                className="w-full sm:w-auto btn btn-primary btn-sm text-xs font-bold rounded-2xl flex items-center justify-center gap-2"
+                className="w-full sm:w-auto btn btn-primary btn-sm text-xs font-bold rounded-2xl flex items-center justify-center px-4"
               >
-                <FileText className="w-4 h-4" />
-                <span>Download Compliance PDF Dossier</span>
+                Download Compliance PDF Dossier
               </Link>
               <Link
                 to={`/reports?action=complaint&incident_id=${verdictResult.incident_id}&db=${verdictResult.measured_db}&cat=${verdictResult.sound_classification}`}
-                className="w-full sm:w-auto btn btn-secondary btn-sm text-xs font-bold rounded-2xl flex items-center justify-center gap-2"
+                className="w-full sm:w-auto btn btn-secondary btn-sm text-xs font-bold rounded-2xl flex items-center justify-center px-4"
               >
-                <Send className="w-4 h-4" />
-                <span>File Municipal Complaint With Proof</span>
+                File Municipal Complaint With Proof
               </Link>
             </div>
           )}
