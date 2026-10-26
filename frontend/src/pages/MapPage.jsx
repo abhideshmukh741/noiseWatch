@@ -3,7 +3,7 @@
  * 
  * Interactive map powered by Leaflet & OpenStreetMap.
  * Displays authorized monitoring sites, active incident clusters,
- * CPCB zone category filters, and an inspection side-panel.
+ * CPCB zone category filters, city/region switcher, and an inspection side-panel.
  * Clean, light environmental design without icons or mirror/glass filters.
  */
 
@@ -11,7 +11,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { locationsAPI, incidentsAPI } from '../services/api';
+import { locationsAPI, incidentsAPI, audioAPI } from '../services/api';
 import { Link } from 'react-router-dom';
 
 // Fix standard Leaflet default icon URL issues with bundlers
@@ -46,6 +46,40 @@ const createCustomMarker = (severity, isSelected) => {
   });
 };
 
+// Distinct User GPS marker with pulsating ring
+const createUserGpsMarker = () => {
+  return L.divIcon({
+    className: 'user-gps-marker',
+    html: `
+      <div style="
+        position: relative;
+        width: 20px;
+        height: 20px;
+      ">
+        <div style="
+          position: absolute;
+          inset: 0;
+          border-radius: 9999px;
+          background-color: #059669;
+          opacity: 0.3;
+          animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        "></div>
+        <div style="
+          position: relative;
+          background-color: #047857;
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          border: 3px solid #ffffff;
+          box-shadow: 0 2px 10px rgba(5, 150, 105, 0.5);
+        "></div>
+      </div>
+    `,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+};
+
 const getZoneLimits = (zone) => {
   switch (zone?.toLowerCase()) {
     case 'commercial': return { day: 65, night: 55 };
@@ -68,14 +102,54 @@ function MapViewController({ center, zoom }) {
   return null;
 }
 
+const INDIAN_CITIES = [
+  { id: 'pune', name: 'Pune', center: [18.5204, 73.8567], zoom: 13 },
+  { id: 'mumbai', name: 'Mumbai', center: [19.0600, 72.8500], zoom: 13 },
+  { id: 'all', name: 'All India', center: [18.7500, 73.3500], zoom: 9 },
+];
+
 export default function MapPage() {
   const [locations, setLocations] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedCity, setSelectedCity] = useState('pune');
   const [zoneFilter, setZoneFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  // Load locations and incidents
+  // Live browser GPS state
+  const [userGps, setUserGps] = useState(null);
+  const [userLocality, setUserLocality] = useState('');
+  const [gpsStatus, setGpsStatus] = useState('idle'); // 'detecting', 'found', 'unsupported'
+
+  // 1. Acquire Live User GPS on Mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      setGpsStatus('detecting');
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          setUserGps({ lat, lon });
+          setGpsStatus('found');
+          try {
+            const res = await audioAPI.detectZone(lat, lon);
+            setUserLocality(res.data.address || `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`);
+          } catch (e) {
+            console.warn('Geocoding error:', e);
+          }
+        },
+        (err) => {
+          console.log('User browser geolocation not provided or denied:', err.message);
+          setGpsStatus('unsupported');
+        },
+        { timeout: 8000, enableHighAccuracy: true }
+      );
+    } else {
+      setGpsStatus('unsupported');
+    }
+  }, []);
+
+  // 2. Load locations and incidents
   useEffect(() => {
     async function fetchData() {
       try {
@@ -87,8 +161,11 @@ export default function MapPage() {
         const items = locRes.data.items || [];
         setLocations(items);
         setIncidents(incRes.data.items || []);
-        if (items.length > 0) {
-          setSelectedLocation(items[0]);
+        
+        // Find first Pune location by default (or user location)
+        const defaultLoc = items.find(l => l.address?.toLowerCase().includes('pune')) || items[0];
+        if (defaultLoc) {
+          setSelectedLocation(defaultLoc);
         }
       } catch (err) {
         console.error('Failed to load map data:', err);
@@ -99,16 +176,59 @@ export default function MapPage() {
     fetchData();
   }, []);
 
-  // Filter locations
+  // Filter locations by City and Zone
   const filteredLocations = locations.filter((loc) => {
-    if (zoneFilter !== 'all' && loc.zone_category !== zoneFilter) return false;
+    // City filter
+    if (selectedCity === 'pune' && !loc.address?.toLowerCase().includes('pune')) {
+      return false;
+    }
+    if (selectedCity === 'mumbai' && !loc.address?.toLowerCase().includes('mumbai')) {
+      return false;
+    }
+
+    // Zone filter (seamlessly handles 'silent' and 'silence_zone')
+    if (zoneFilter !== 'all') {
+      if (zoneFilter === 'silent') {
+        if (loc.zone_category !== 'silent' && loc.zone_category !== 'silence_zone') return false;
+      } else if (loc.zone_category !== zoneFilter) {
+        return false;
+      }
+    }
+
     return true;
   });
 
   const selectedLimits = getZoneLimits(selectedLocation?.zone_category);
+  
+  // Dynamic Map Center
   const activeCenter = selectedLocation 
     ? [selectedLocation.latitude, selectedLocation.longitude]
-    : [19.0760, 72.8777];
+    : (selectedCity === 'pune' ? [18.5204, 73.8567] : [19.0600, 72.8500]);
+
+  const handleCitySwitch = (cityId) => {
+    setSelectedCity(cityId);
+    if (cityId === 'user' && userGps) {
+      setSelectedLocation({
+        id: 'user-live-loc',
+        name: 'Your Real-Time GPS Location',
+        description: userLocality || 'Current citizen device location',
+        latitude: userGps.lat,
+        longitude: userGps.lon,
+        zone_category: 'residential',
+        address: userLocality || 'Current Position',
+        day_threshold_dba: 55,
+        night_threshold_dba: 45,
+      });
+      return;
+    }
+
+    const cityLocs = locations.filter(l => 
+      cityId === 'all' || l.address?.toLowerCase().includes(cityId)
+    );
+    if (cityLocs.length > 0) {
+      setSelectedLocation(cityLocs[0]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto space-y-6">
@@ -120,55 +240,97 @@ export default function MapPage() {
             Acoustic Monitoring Site Network
           </h1>
           <p className="text-xs text-[#475569] mt-1">
-            Geographic distribution of municipal and automated acoustic monitoring stations across India
+            Real-time noise compliance mapping across Indian cities and live GPS coordinates
           </p>
         </div>
 
-        {/* Privacy Note without icons */}
+        {/* Live GPS status pill */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#e2e8f0] text-xs text-[#475569] font-medium shadow-xs">
-          <span className="badge-emerald text-[10px]">Notice</span>
-          <span>Residential locations anonymized to protect citizen privacy</span>
+          <span className="badge-emerald text-[10px]">
+            {userGps ? 'GPS ACTIVE' : 'INDIAN NETWORK'}
+          </span>
+          <span>
+            {userGps 
+              ? `Live at: ${userLocality ? userLocality.slice(0, 36) + '...' : `${userGps.lat.toFixed(3)}°, ${userGps.lon.toFixed(3)}°`}`
+              : 'Pune / Maharashtra Municipal Baseline'}
+          </span>
         </div>
       </div>
 
-      {/* ── Filter Bar (Solid White, No Mirror Filter) ────────────── */}
-      <div className="bg-white border border-[#e2e8f0] p-5 rounded-3xl flex flex-wrap items-center justify-between gap-4 shadow-xs">
+      {/* ── City / Region Selector Bar (Zero Icons, Solid Cards) ───── */}
+      <div className="bg-white border border-[#e2e8f0] p-4 rounded-3xl flex flex-wrap items-center justify-between gap-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-[#475569] font-bold uppercase tracking-wider mr-2">
-            Zone Type:
+            Region / City:
           </span>
-          {['all', 'residential', 'commercial', 'industrial', 'silent'].map((zone) => (
+
+          {userGps && (
             <button
-              key={zone}
-              onClick={() => {
-                setZoneFilter(zone);
-                const match = locations.find(l => zone === 'all' || l.zone_category === zone);
-                if (match) setSelectedLocation(match);
-              }}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold capitalize transition-all ${
-                zoneFilter === zone
+              onClick={() => handleCitySwitch('user')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                selectedCity === 'user'
+                  ? 'bg-[#059669] text-white shadow-sm'
+                  : 'bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0] hover:bg-[#d1fae5]'
+              }`}
+            >
+              My Current GPS Location
+            </button>
+          )}
+
+          {INDIAN_CITIES.map((city) => (
+            <button
+              key={city.id}
+              onClick={() => handleCitySwitch(city.id)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                selectedCity === city.id
                   ? 'bg-[#059669] text-white shadow-sm'
                   : 'bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0]'
               }`}
             >
-              {zone}
+              {city.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Zone Filters with fixed Silence Zone mapping */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-[#475569] font-bold uppercase tracking-wider mr-2">
+            Zone:
+          </span>
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'residential', label: 'Residential' },
+            { id: 'commercial', label: 'Commercial' },
+            { id: 'industrial', label: 'Industrial' },
+            { id: 'silent', label: 'Silence Zone' },
+          ].map((zone) => (
+            <button
+              key={zone.id}
+              onClick={() => setZoneFilter(zone.id)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
+                zoneFilter === zone.id
+                  ? 'bg-[#0f172a] text-white'
+                  : 'bg-[#f8fafc] border border-[#cbd5e1] text-[#475569] hover:bg-[#f1f5f9]'
+              }`}
+            >
+              {zone.label}
             </button>
           ))}
         </div>
 
         <div className="text-xs text-[#475569] font-mono font-medium bg-[#f1f5f9] px-3.5 py-1.5 rounded-full border border-[#e2e8f0]">
-          Showing {filteredLocations.length} Active Monitoring Sites
+          Showing {filteredLocations.length} Active Stations
         </div>
       </div>
 
       {/* ── Map Container & Details Side Panel ───────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Leaflet Map (2 Columns, Solid Card, No Mirror Filter) */}
+        {/* Leaflet Map (2 Columns, Solid White Card, No Mirror Filter) */}
         <div className="lg:col-span-2 bg-white border border-[#e2e8f0] p-3 rounded-3xl h-[580px] relative overflow-hidden shadow-xs">
           <MapContainer
             center={activeCenter}
-            zoom={13}
+            zoom={selectedCity === 'all' ? 9 : 13}
             scrollWheelZoom={false}
             style={{ height: '100%', width: '100%', borderRadius: '1.5rem' }}
           >
@@ -178,9 +340,27 @@ export default function MapPage() {
             />
 
             {/* Dynamic Map Controller for smooth pan/zoom */}
-            <MapViewController center={activeCenter} zoom={13} />
+            <MapViewController center={activeCenter} zoom={selectedCity === 'all' ? 9 : 13} />
 
-            {/* Markers properly mounted using React Fragment (No div wrapper) */}
+            {/* User's Live Real-Time GPS Marker (if allowed by browser) */}
+            {userGps && (
+              <Marker
+                position={[userGps.lat, userGps.lon]}
+                icon={createUserGpsMarker()}
+              >
+                <Popup>
+                  <div className="p-1 space-y-1">
+                    <div className="font-bold text-xs text-[#047857]">You Are Here (Live Device)</div>
+                    <div className="text-[11px] text-[#334155]">{userLocality || 'Current Device Position'}</div>
+                    <div className="text-[10px] text-[#64748b] font-mono">
+                      {userGps.lat.toFixed(4)}°N, {userGps.lon.toFixed(4)}°E
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+
+            {/* Regional Monitoring Station Markers */}
             {filteredLocations.map((loc) => {
               const siteIncidents = incidents.filter((i) => i.location_id === loc.id);
               const hasHighSev = siteIncidents.some((i) => i.severity === 'high');
@@ -213,8 +393,8 @@ export default function MapPage() {
                       <div className="p-1 space-y-1">
                         <div className="font-bold text-xs text-[#0f172a]">{loc.name}</div>
                         <div className="text-[11px] text-[#475569] capitalize">CPCB Zone: {loc.zone_category}</div>
-                        <div className="text-[11px] text-[#475569]">Day Limit: {loc.day_threshold_dba} dB(A)</div>
-                        <div className="text-[10px] text-[#475569] font-mono">Site ID: {loc.id}</div>
+                        <div className="text-[11px] text-[#475569]">Day Limit: {loc.day_threshold_dba || 55} dB(A)</div>
+                        <div className="text-[10px] text-[#475569] font-mono">Location: {loc.address}</div>
                       </div>
                     </Popup>
                   </Marker>
@@ -238,6 +418,12 @@ export default function MapPage() {
               <span className="w-2.5 h-2.5 rounded-full bg-[#059669]" />
               <span className="text-[#475569]">Within Statutory Limit</span>
             </div>
+            {userGps && (
+              <div className="flex items-center gap-2 pt-1 border-t border-[#f1f5f9]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#047857] ring-2 ring-[#a7f3d0]" />
+                <span className="text-[#047857] font-bold">Your Live Device</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -254,6 +440,9 @@ export default function MapPage() {
                 </h2>
                 <p className="text-xs text-[#475569] mt-1 leading-relaxed">
                   {selectedLocation.description || 'Continuous ambient acoustic screening station.'}
+                </p>
+                <p className="text-xs font-semibold text-[#0f172a] mt-1">
+                  {selectedLocation.address}
                 </p>
               </div>
 
@@ -280,10 +469,10 @@ export default function MapPage() {
                 <div className="text-[#0f172a]">Lon: {selectedLocation.longitude.toFixed(4)}° E</div>
               </div>
 
-              {/* Quick Jump List to Switch Monitoring Sites */}
+              {/* Quick Jump List to Switch Monitoring Sites in Selected Region */}
               <div>
                 <h4 className="text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-2">
-                  Select Monitoring Station
+                  Stations in {selectedCity.toUpperCase()}
                 </h4>
                 <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
                   {filteredLocations.map((site) => (
