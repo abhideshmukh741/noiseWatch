@@ -135,6 +135,7 @@ async def detect_zone_from_gps(lat: float, lon: float) -> Dict[str, Any]:
         "zone_name": zone_info["name"],
         "zone_description": zone_info["description"],
         "time_period": time_period,
+        "current_hour": ist_hour,
         "current_threshold_dba": current_threshold,
         "day_threshold_dba": zone_info["day_threshold_dba"],
         "night_threshold_dba": zone_info["night_threshold_dba"],

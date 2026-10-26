@@ -93,14 +93,20 @@ export default function Navbar() {
           {/* Mobile Fallback Dropdown */}
           {mobileOpen && (
             <div className="md:hidden py-3 px-2 border border-[#e2e8f0] rounded-2xl bg-white shadow-lg space-y-1 my-2">
-              {['/dashboard', '/map', '/analytics', '/reports'].map((p) => (
+              {[
+                { path: '/', label: 'HOME' },
+                { path: '/dashboard', label: 'DASHBOARD' },
+                { path: '/map', label: 'MAP' },
+                { path: '/analytics', label: 'HISTORY' },
+                { path: '/reports', label: 'REPORTS' },
+              ].map((item) => (
                 <Link
-                  key={p}
-                  to={p}
+                  key={item.path}
+                  to={item.path}
                   onClick={() => setMobileOpen(false)}
                   className="block px-4 py-2 rounded-full text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
                 >
-                  {p.replace('/', '').toUpperCase()}
+                  {item.label}
                 </Link>
               ))}
               {isAuthenticated && (

@@ -341,7 +341,9 @@ export function MobileNoiseDetector() {
           </span>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[#0f172a] uppercase">
-              {zoneData ? `${zoneData.time_period} Period (${zoneData.current_hour}:00 IST)` : 'Current Hour'}
+              {zoneData 
+                ? `${zoneData.time_period} Period (${String(zoneData.current_hour ?? new Date().getHours()).padStart(2, '0')}:00 IST)` 
+                : `Period (${String(new Date().getHours()).padStart(2, '0')}:00 IST)`}
             </span>
             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
               isNight ? 'bg-[#fef3c7] text-[#b45309] border border-[#fde68a]' : 'bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0]'

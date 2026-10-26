@@ -27,6 +27,23 @@ const HomeIcon = ({ className = "w-5 h-5", active }) => (
   </svg>
 );
 
+const DashboardIcon = ({ className = "w-5 h-5", active }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill={active ? "currentColor" : "none"} 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="3" width="7" height="8" rx="1.5" />
+    <rect x="14" y="3" width="7" height="5" rx="1.5" />
+    <rect x="14" y="12" width="7" height="9" rx="1.5" />
+    <rect x="3" y="15" width="7" height="6" rx="1.5" />
+  </svg>
+);
+
 const MapIcon = ({ className = "w-5 h-5", active }) => (
   <svg 
     className={className} 
@@ -73,7 +90,8 @@ const ReportsIcon = ({ className = "w-5 h-5", active }) => (
 );
 
 export const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Home', icon: HomeIcon },
+  { path: '/', label: 'Home', icon: HomeIcon },
+  { path: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
   { path: '/map', label: 'Map', icon: MapIcon },
   { path: '/analytics', label: 'History', icon: HistoryChartIcon },
   { path: '/reports', label: 'Reports', icon: ReportsIcon },
@@ -83,16 +101,19 @@ export function CurvedNavbar({ isFloating = false }) {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Active tab index
+  // Active tab index with proper root '/' and sub-path handling
   const activeIdx = Math.max(
     0,
-    NAV_ITEMS.findIndex(item => item.path === currentPath || (item.path !== '/' && currentPath.startsWith(item.path)))
+    NAV_ITEMS.findIndex(item => {
+      if (item.path === '/') return currentPath === '/';
+      return currentPath === item.path || currentPath.startsWith(item.path + '/');
+    })
   );
 
-  // Width & height dimensions of the navbar
-  const totalWidth = 440;
+  // Width & height dimensions of the navbar for 5 balanced tabs
+  const totalWidth = 475;
   const height = 66;
-  const itemWidth = totalWidth / NAV_ITEMS.length; // 110px per item
+  const itemWidth = totalWidth / NAV_ITEMS.length; // 95px per item
   
   // Calculate center X of the active tab
   const activeX = (activeIdx + 0.5) * itemWidth;
@@ -106,14 +127,14 @@ export function CurvedNavbar({ isFloating = false }) {
 
   // Generate SVG path contour with smooth scooped Bézier dip at X
   const R = 22; // corner radius
-  const scoopWidth = 44; // half-width of scoop (88px total width)
+  const scoopWidth = 40; // half-width of scoop
   const scoopDepth = 28; // depth of the scooped dip
   
   const pathD = `
     M ${R},0
     L ${Math.max(R, currentX - scoopWidth)},0
-    C ${currentX - 22},0 ${currentX - 22},${scoopDepth} ${currentX},${scoopDepth}
-    C ${currentX + 22},${scoopDepth} ${currentX + 22},0 ${Math.min(totalWidth - R, currentX + scoopWidth)},0
+    C ${currentX - 20},0 ${currentX - 20},${scoopDepth} ${currentX},${scoopDepth}
+    C ${currentX + 20},${scoopDepth} ${currentX + 20},0 ${Math.min(totalWidth - R, currentX + scoopWidth)},0
     L ${totalWidth - R},0
     A ${R},${R} 0 0 1 ${totalWidth},${R}
     L ${totalWidth},${height - R}
