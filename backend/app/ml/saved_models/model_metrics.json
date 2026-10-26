@@ -1,0 +1,195 @@
+{
+  "model_name": "NoiseWatch Acoustic Random Forest Classifier",
+  "model_version": "rf-acoustic-v1.0",
+  "algorithm": "RandomForestClassifier (n_estimators=150, max_depth=14)",
+  "is_trained": true,
+  "is_placeholder": false,
+  "test_accuracy": 0.98,
+  "f1_macro": 0.9799,
+  "cv_mean_accuracy": 0.9795,
+  "cv_std_accuracy": 0.0051,
+  "total_training_samples": 2000,
+  "test_samples": 400,
+  "categories": [
+    "traffic",
+    "construction",
+    "machinery",
+    "alarm",
+    "music",
+    "voice",
+    "nature",
+    "unknown"
+  ],
+  "feature_names": [
+    "rms_energy",
+    "zero_crossing_rate",
+    "spectral_centroid",
+    "spectral_bandwidth",
+    "spectral_rolloff",
+    "low_band_ratio",
+    "mid_band_ratio",
+    "high_band_ratio",
+    "spectral_crest",
+    "spectral_flatness",
+    "temporal_crest"
+  ],
+  "feature_importances": {
+    "temporal_crest": 0.2095,
+    "spectral_rolloff": 0.1342,
+    "spectral_bandwidth": 0.1233,
+    "zero_crossing_rate": 0.1206,
+    "spectral_flatness": 0.102,
+    "low_band_ratio": 0.0831,
+    "spectral_centroid": 0.0721,
+    "high_band_ratio": 0.0712,
+    "spectral_crest": 0.0485,
+    "mid_band_ratio": 0.0245,
+    "rms_energy": 0.0109
+  },
+  "confusion_matrix": [
+    [
+      50,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      50,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      50,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      50,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      50,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      50,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      43,
+      7
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      49
+    ]
+  ],
+  "classification_report": {
+    "alarm": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "construction": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "machinery": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "music": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "nature": {
+      "precision": 0.9772727272727273,
+      "recall": 0.86,
+      "f1-score": 0.9148936170212766,
+      "support": 50.0
+    },
+    "traffic": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "unknown": {
+      "precision": 0.875,
+      "recall": 0.98,
+      "f1-score": 0.9245283018867925,
+      "support": 50.0
+    },
+    "voice": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "accuracy": 0.98,
+    "macro avg": {
+      "precision": 0.9815340909090909,
+      "recall": 0.98,
+      "f1-score": 0.9799277398635087,
+      "support": 400.0
+    },
+    "weighted avg": {
+      "precision": 0.9815340909090909,
+      "recall": 0.98,
+      "f1-score": 0.9799277398635087,
+      "support": 400.0
+    }
+  },
+  "trained_at": "2026-10-26T05:25:23.663794+00:00"
+}

@@ -40,9 +40,10 @@ NoiseWatch is a full-stack environmental acoustic intelligence and automated reg
 ## 2. Technology Stack
 
 - **Frontend**: React 19, Vite, Tailwind CSS v4, Recharts, Leaflet / OpenStreetMap, React Router v7, Axios, Lucide Icons.
-- **Backend**: Python 3.10+, FastAPI, Pydantic v2, ReportLab PDF Engine, NumPy, SciPy, Scikit-learn, Python-Jose (JWT), Passlib.
+- **Backend**: Python 3.10+, FastAPI, Pydantic v2, ReportLab PDF Engine, NumPy, SciPy, Scikit-learn (Random Forest Pipeline, StandardScaler), Python-Jose (JWT), Passlib.
+- **Machine Learning**: 11-dimensional acoustic feature extraction pipeline (RMS, ZCR, Spectral Centroid, Bandwidth, Rolloff, Sub-band Energy Ratios, Spectral Flatness, Temporal Crest Factor), Random Forest Classifier with 98.0% test accuracy & 97.95% 5-fold cross-validation.
 - **Database & Auth**: PostgreSQL (Supabase compatible), Row Level Security (RLS), Supabase Storage for encrypted evidence and generated reports.
-- **Testing**: Python integration test runner with 16 automated test suites passing.
+- **Testing**: Python integration test runner with 19 automated test suites passing.
 
 ---
 
@@ -59,13 +60,17 @@ noise_polution/
 │   │   │       ├── auth.py           # JWT login, registration & profiles
 │   │   │       ├── dashboard.py      # Telemetry, readings, sites, devices
 │   │   │       ├── reports.py        # PDF streaming & complaints
-│   │   │       └── audio.py          # Feature extraction & ML classification
+│   │   │       └── audio.py          # Feature extraction, ML inference, retraining & WAV upload
 │   │   ├── core/
 │   │   │   ├── auth.py               # Token creation, verification, RBAC
 │   │   │   ├── config.py             # Pydantic v2 application settings
 │   │   │   └── database.py           # Supabase & async database helpers
 │   │   ├── ml/
-│   │   │   └── classifier.py         # FFT, spectral centroid, baseline classifier
+│   │   │   ├── classifier.py         # Trained Random Forest inference & heuristic fallback
+│   │   │   ├── train_model.py        # Physical acoustic synthesis, training & evaluation pipeline
+│   │   │   └── saved_models/
+│   │   │       ├── sound_classifier.joblib  # Serialized Scikit-Learn Pipeline
+│   │   │       └── model_metrics.json       # Accuracy, CV scores & feature importances
 │   │   ├── models/
 │   │   │   └── models.py             # ORM entity schema
 │   │   ├── schemas/
@@ -79,7 +84,7 @@ noise_polution/
 │   │   └── 001_initial_schema.sql    # PostgreSQL DDL, RLS policies, audit logs
 │   ├── requirements.txt              # Backend dependencies
 │   └── tests/
-│       ├── test_backend.py           # 16 Unit & integration tests
+│       ├── test_backend.py           # 18 Unit & integration tests
 │       └── run_tests.py              # Automated test executor
 └── frontend/
     ├── public/                       # Static public assets
@@ -134,7 +139,7 @@ pip install -r requirements.txt
 Run backend tests:
 ```bash
 python tests/run_tests.py
-# Output: RESULTS: 16 passed, 0 failed out of 16 tests.
+# Output: RESULTS: 19 passed, 0 failed out of 19 tests.
 ```
 
 Start the FastAPI development server:
