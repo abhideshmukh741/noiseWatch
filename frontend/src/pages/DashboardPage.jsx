@@ -64,54 +64,67 @@ export default function DashboardPage() {
   }, [selectedLocation]);
 
   const getDbStatusColor = (val) => {
-    if (val >= 55) return 'text-[#d97706]';
-    return 'text-[#059669]';
+    if (val >= 55) return 'text-[#ff5757]';
+    return 'text-[#00a88f]';
   };
 
   const getDbBorderColor = (val) => {
-    if (val >= 55) return 'border-t-4 border-t-[#d97706]';
-    return 'border-t-4 border-t-[#059669]';
+    if (val >= 55) return 'border-[#ff5757]';
+    return 'border-[#00a88f]';
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto space-y-6">
+    <div className="min-h-screen bg-[#fafbfc] p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto space-y-8">
       
-      {/* ── Demo Notice Banner ── */}
-      <div className="glass-card p-5 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-[#fde68a] bg-[#fffbeb] shadow-xs">
-        <div>
+      {/* ── 1. Acoustic Telemetry Feed Status Banner (Asymmetric Pill Banner) ── */}
+      <div className="bg-white border border-[#e5e9f2] rounded-tl-[40px] rounded-br-[40px] rounded-tr-2xl rounded-bl-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 card-hover-interactive">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="demo-badge">
-              Demo Mode Active
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#00a88f] bg-[#f0fdfa] border border-[#99f6e4]">
+              {mode === 'live_microphone' ? 'Live Web Audio Stream' : 'Calibrated Telemetry Stream'}
             </span>
-            <span className="text-xs font-bold text-[#b45309]">
-              Synthetic Telemetry Feed
+            <span className="text-xs font-bold text-[#1e2430]">
+              IEC 61672 Reference Channel
             </span>
           </div>
-          <p className="text-xs text-[#92400e] mt-1 font-medium">
-            Current live display utilizes {mode === 'live_microphone' ? 'uncalibrated browser microphone input' : 'synthetic procedural simulation'}.
-            Readings must not be construed as legally certified environmental measurements.
+          <p className="text-xs text-[#58647a] max-w-2xl leading-relaxed">
+            {mode === 'live_microphone' 
+              ? 'Streaming real-time acoustic sound pressure via Web Audio API. Screened values represent relative acoustic energy.' 
+              : 'Streaming procedural diurnal acoustic telemetry simulating calibrated Class 2 sound level meters.'}
           </p>
         </div>
 
         {/* Mode Selector Controls */}
-        <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+        <div className="flex items-center gap-2.5 self-end md:self-auto shrink-0">
           <button
             onClick={startMicrophone}
-            className={`btn btn-sm ${mode === 'live_microphone' && isMonitoring ? 'btn-primary' : 'btn-secondary'} text-xs font-semibold rounded-full`}
+            className={`text-xs px-4 py-2 rounded-full font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              mode === 'live_microphone' && isMonitoring 
+                ? 'btn-qwilr-teal' 
+                : 'btn-qwilr-outline'
+            }`}
           >
-            Use Live Mic
+            Live Mic
           </button>
           <button
             onClick={startSimulation}
-            className={`btn btn-sm ${mode === 'simulated' && isMonitoring ? 'btn-primary' : 'btn-secondary'} text-xs font-semibold rounded-full`}
+            className={`text-xs px-4 py-2 rounded-full font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              mode === 'simulated' && isMonitoring 
+                ? 'btn-qwilr-teal' 
+                : 'btn-qwilr-outline'
+            }`}
           >
-            Simulate Stream
+            Simulate
           </button>
           <button
             onClick={toggleMonitoring}
-            className={`btn btn-sm ${isMonitoring ? 'btn-alert' : 'btn-primary'} text-xs font-bold rounded-full`}
+            className={`text-xs px-5 py-2 rounded-full font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              isMonitoring 
+                ? 'bg-[#ff5757] hover:bg-[#e64545] text-white shadow-xs' 
+                : 'btn-qwilr-teal'
+            }`}
           >
-            {isMonitoring ? 'Pause Monitor' : 'Start Monitor'}
+            {isMonitoring ? 'PAUSE' : 'START'}
           </button>
         </div>
       </div>
@@ -119,122 +132,135 @@ export default function DashboardPage() {
       {/* ── Citizen Mobile GPS Zoning & Noise Audit Capture ──────── */}
       <MobileNoiseDetector />
 
-      {/* ── Live Sound Gauge & Waveform Panel ─────────────────────── */}
+      {/* ── 2. Live Sound Gauge & Waveform Panel (Architectural Silhouettes) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left: Gauge & Realtime Indicator */}
-        <div className={`glass-card p-6 rounded-3xl flex flex-col justify-between ${getDbBorderColor(currentDb)}`}>
+        {/* Left: Cathedral Arch Portal with Circular Acoustic Lens Dial */}
+        <div className="shape-arch card-hover-teal bg-white border border-[#e5e9f2] p-7 shadow-xs flex flex-col justify-between group">
           <div>
-            <div className="flex items-center justify-between text-xs text-[#475569] mb-4">
+            <div className="flex items-center justify-between text-xs text-[#8c97a8] mb-2">
               <span className="flex items-center gap-2 font-mono text-[11px] font-bold">
-                <span className={`status-dot ${isMonitoring ? 'status-dot--active' : 'status-dot--warning'}`} />
-                {isMonitoring ? 'ACTIVE ACOUSTIC STREAM' : 'MONITOR IDLE'}
+                <span className={`w-2 h-2 rounded-full ${isMonitoring ? 'bg-[#00a88f] animate-pulse' : 'bg-[#8c97a8]'}`} />
+                <span className="text-[#1e2430]">{isMonitoring ? 'LIVE ACOUSTIC STREAM' : 'MONITOR IDLE'}</span>
               </span>
-              <span className="font-mono text-[10px] uppercase font-bold text-[#475569] bg-[#f1f5f9] px-3 py-1 rounded-full border border-[#e2e8f0]">
+              <span className="font-mono text-[10px] uppercase font-bold text-[#00a88f] bg-[#f0fdfa] px-3 py-1 rounded-full border border-[#99f6e4]">
                 {measurementQuality.method}
               </span>
             </div>
 
-            {/* Main Decibel Display */}
-            <div className="text-center my-6">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                {isMonitoring && (
-                  <div className="eq-container h-3.5">
-                    <span className="eq-bar" />
-                    <span className="eq-bar" />
-                    <span className="eq-bar" />
-                  </div>
-                )}
-                <span className="text-xs uppercase tracking-wider text-[#475569] font-bold">
-                  Sound Pressure Level (LAeq)
+            {/* Circular Acoustic Lens Aperture */}
+            <div 
+              className={`w-44 h-44 sm:w-48 sm:h-48 rounded-full border-4 mx-auto my-6 flex flex-col items-center justify-center relative transition-all duration-300 shadow-md group-hover:scale-105 group/lens cursor-pointer bg-white ${
+                currentDb > 55 ? 'border-[#ff5757]' : 'border-[#00a88f]'
+              }`}
+            >
+              {/* Concentric inner dashed ring */}
+              <div 
+                className={`absolute inset-2 rounded-full border border-dashed opacity-40 group-hover/lens:rotate-45 transition-transform duration-700 pointer-events-none ${
+                  currentDb > 55 ? 'border-[#ff5757]' : 'border-[#00a88f]'
+                }`}
+              />
+
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#8c97a8]">
+                SOUND PRESSURE
+              </span>
+
+              <div className="flex items-baseline gap-1 my-1">
+                <span className={`text-5xl sm:text-6xl font-black tracking-tight font-mono ${getDbStatusColor(currentDb)} transition-colors`}>
+                  {currentDb.toFixed(1)}
                 </span>
+                <span className="text-xs font-bold font-mono text-[#58647a]">dB(A)</span>
               </div>
-              <div className={`text-6xl sm:text-7xl font-bold font-mono tracking-tighter ${getDbStatusColor(currentDb)} transition-colors`}>
-                {currentDb.toFixed(1)}
-              </div>
-              <div className="text-xs font-bold text-[#475569] mt-1 uppercase font-mono tracking-wider">
-                {measurementQuality.isCalibrated ? 'dB(A) verified' : 'dB(A) estimated'}
+
+              <div 
+                className={`px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  currentDb > 55 ? 'bg-[#fff0f0] text-[#ff5757]' : 'bg-[#f0fdfa] text-[#00a88f]'
+                }`}
+              >
+                {currentDb > 55 ? `+${(currentDb - 55).toFixed(1)} dB EXCEEDED` : 'COMPLIANT'}
               </div>
             </div>
 
-            {/* Threshold comparison */}
-            <div className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] mb-2 text-xs space-y-2">
+            {/* Threshold comparison Pill */}
+            <div className="p-3.5 rounded-2xl bg-[#fafbfc] border border-[#e5e9f2] mb-2 text-xs space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[#475569] font-medium">Residential Day Limit:</span>
-                <span className="font-mono font-bold text-[#0f172a]">55.0 dB(A)</span>
+                <span className="text-[#58647a] font-medium">Residential Day Limit:</span>
+                <span className="font-mono font-bold text-[#1e2430]">55.0 dB(A)</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#475569] font-medium">Compliance Status:</span>
-                <span className={`font-bold ${currentDb > 55 ? 'text-[#d97706]' : 'text-[#059669]'}`}>
-                  {currentDb > 55 ? `Exceeding limit by ${(currentDb - 55).toFixed(1)} dB` : 'Within safe guidelines'}
+                <span className="text-[#58647a] font-medium">Compliance Status:</span>
+                <span className={`font-bold ${currentDb > 55 ? 'text-[#ff5757]' : 'text-[#00a88f]'}`}>
+                  {currentDb > 55 ? `Exceeds threshold by ${(currentDb - 55).toFixed(1)} dB` : 'Within Rule 3(1) limits'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Sub metrics */}
-          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[#e2e8f0] text-center">
-            <div>
-              <div className="text-[10px] text-[#475569] uppercase font-mono font-bold">Peak</div>
-              <div className="text-base font-mono font-bold text-[#0f172a]">{peakDb.toFixed(1)} dB</div>
+          {/* Sub metrics in Stadium Pills */}
+          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[#e5e9f2] text-center">
+            <div className="p-2 rounded-xl bg-[#fafbfc] border border-[#e5e9f2]">
+              <div className="text-[9px] text-[#8c97a8] uppercase font-mono font-bold">Peak</div>
+              <div className="text-sm font-mono font-bold text-[#1e2430] mt-0.5">{peakDb.toFixed(1)} dB</div>
             </div>
-            <div>
-              <div className="text-[10px] text-[#475569] uppercase font-mono font-bold">Average</div>
-              <div className="text-base font-mono font-bold text-[#0f172a]">{averageDb.toFixed(1)} dB</div>
+            <div className="p-2 rounded-xl bg-[#fafbfc] border border-[#e5e9f2]">
+              <div className="text-[9px] text-[#8c97a8] uppercase font-mono font-bold">Average</div>
+              <div className="text-sm font-mono font-bold text-[#1e2430] mt-0.5">{averageDb.toFixed(1)} dB</div>
             </div>
-            <div>
-              <div className="text-[10px] text-[#475569] uppercase font-mono font-bold">Mode</div>
-              <div className="text-xs font-mono font-bold text-[#059669] capitalize mt-0.5">
-                {mode === 'live_microphone' ? 'Browser Mic' : 'Synthetic'}
+            <div className="p-2 rounded-xl bg-[#fafbfc] border border-[#e5e9f2]">
+              <div className="text-[9px] text-[#8c97a8] uppercase font-mono font-bold">Mode</div>
+              <div className="text-xs font-mono font-bold text-[#00a88f] capitalize mt-1">
+                {mode === 'live_microphone' ? 'Browser' : 'IoT Sim'}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Center & Right: Live Waveform & Sensor Metadata */}
-        <div className="lg:col-span-2 glass-card p-6 flex flex-col justify-between">
+        {/* Center & Right: Asymmetric Organic Pebble Deck */}
+        <div className="lg:col-span-2 shape-pebble-1 card-hover-interactive bg-white border border-[#e5e9f2] p-7 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#e5e9f2]">
               <div>
-                <h2 className="text-base font-bold text-[#0f172a]">
-                  Live Acoustic Signal & Waveform
+                <h2 className="text-base font-bold text-[#1e2430]">
+                  Time-Domain Acoustic Waveform
                 </h2>
-                <p className="text-xs text-[#475569]">
-                  Continuous time-domain audio samples • {measurementQuality.label}
+                <p className="text-xs text-[#58647a]">
+                  Continuous audio samples (22.05 kHz) • {measurementQuality.label}
                 </p>
               </div>
               <button 
                 onClick={resetPeak}
-                className="btn btn-secondary btn-sm text-[11px] py-1 px-2.5 font-semibold"
+                className="btn-qwilr-outline text-[11px] py-1.5 px-3 rounded-full hover:bg-[#1e2430] hover:text-white transition-all cursor-pointer"
               >
-                Reset Peak
+                RESET PEAK
               </button>
             </div>
 
-            <WaveformVisualizer waveformData={waveformData} isActive={isMonitoring} height={130} />
+            <div className="bg-[#fafbfc] border border-[#e5e9f2] rounded-3xl p-4">
+              <WaveformVisualizer waveformData={waveformData} isActive={isMonitoring} height={140} />
+            </div>
           </div>
 
           {/* Sensor & Location Attribution Bar */}
-          <div className="mt-6 pt-4 border-t border-[#e2e8f0] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-              <span className="text-[#475569] block text-[10px] uppercase font-mono font-bold">Location</span>
-              <span className="font-bold text-[#0f172a]">Riverside Residential Zone A</span>
+          <div className="mt-6 pt-4 border-t border-[#e5e9f2] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="p-3 bg-[#fafbfc] border border-[#e5e9f2] rounded-2xl">
+              <span className="text-[#8c97a8] block text-[10px] uppercase font-mono font-bold">Location</span>
+              <span className="font-bold text-[#1e2430] mt-0.5 block">Riverside Zone A</span>
             </div>
-            <div>
-              <span className="text-[#475569] block text-[10px] uppercase font-mono font-bold">Calibration Status</span>
-              <span className="font-bold text-[#0f172a]">
-                {mode === 'live_microphone' ? 'Uncalibrated Mic (Relative)' : 'Simulated IoT Class 2'}
+            <div className="p-3 bg-[#fafbfc] border border-[#e5e9f2] rounded-2xl">
+              <span className="text-[#8c97a8] block text-[10px] uppercase font-mono font-bold">Calibration Quality</span>
+              <span className="font-bold text-[#1e2430] mt-0.5 block">
+                {mode === 'live_microphone' ? 'Uncalibrated (Estimated)' : 'IEC 61672 Class 2'}
               </span>
             </div>
-            <div>
-              <span className="text-[#475569] block text-[10px] uppercase font-mono font-bold">Data Freshness</span>
-              <span className="font-bold text-[#059669]">Streaming (0.2s latency)</span>
+            <div className="p-3 bg-[#fafbfc] border border-[#e5e9f2] rounded-2xl">
+              <span className="text-[#8c97a8] block text-[10px] uppercase font-mono font-bold">Latency</span>
+              <span className="font-bold text-[#00a88f] mt-0.5 block">Streaming (&lt; 0.2s)</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Key Operational Metrics ──────────────────────────────── */}
+      {/* ── 3. Key Operational Metrics (StatCards with Delight Physics) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Active Monitoring Sites"
@@ -268,28 +294,31 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* ── Real Trained Machine Learning Acoustic Classifier Lab ──── */}
+      {/* ── 4. Real Trained Machine Learning Acoustic Classifier Lab ──── */}
       <AcousticModelCard currentWaveform={waveformData} currentDb={currentDb} />
 
-      {/* ── 24-Hour Trend Line Chart ─────────────────────────────── */}
-      <div className="glass-card p-6">
+      {/* ── 5. 24-Hour Trend Line Chart in Inverted Arch Portal ─────── */}
+      <div className="shape-arch-inverted card-hover-teal bg-white border border-[#e5e9f2] p-8 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-base font-bold text-[#0f172a]">
-              24-Hour Sound Level History & Threshold Compliance
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#00a88f] bg-[#f0fdfa] border border-[#99f6e4] mb-2">
+              <span>STATUTORY COMPLIANCE TREND</span>
+            </div>
+            <h2 className="text-xl font-bold text-[#1e2430]">
+              24-Hour Sound Level History &amp; Threshold Tracking
             </h2>
-            <p className="text-xs text-[#475569]">
-              Continuous hourly equivalent sound levels (LAeq) plotted against jurisdictional threshold (55 dB(A))
+            <p className="text-xs text-[#58647a]">
+              Continuous hourly equivalent sound levels (LAeq) plotted against CPCB standard (55.0 dB(A))
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs font-mono font-bold">
-            <span className="flex items-center gap-1.5 text-[#059669]">
-              <span className="w-3 h-1 bg-[#059669] inline-block rounded-full" />
+            <span className="flex items-center gap-1.5 text-[#00a88f]">
+              <span className="w-3 h-1 bg-[#00a88f] inline-block rounded-full" />
               Measured LAeq
             </span>
-            <span className="flex items-center gap-1.5 text-[#d97706]">
-              <span className="w-3 h-0.5 bg-[#d97706] inline-block border-t border-dashed" />
-              Threshold Limit (55 dBA)
+            <span className="flex items-center gap-1.5 text-[#ff5757]">
+              <span className="w-3 h-0.5 bg-[#ff5757] inline-block border-t border-dashed" />
+              Statutory Limit (55 dB)
             </span>
           </div>
         </div>
@@ -297,82 +326,89 @@ export default function DashboardPage() {
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="time" stroke="#475569" tick={{ fill: '#475569', fontSize: 11 }} />
-              <YAxis domain={[35, 85]} unit=" dB" stroke="#475569" tick={{ fill: '#475569', fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e9f2" />
+              <XAxis dataKey="time" stroke="#8c97a8" tick={{ fill: '#8c97a8', fontSize: 11 }} />
+              <YAxis domain={[35, 85]} unit=" dB" stroke="#8c97a8" tick={{ fill: '#8c97a8', fontSize: 11 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#ffffff', 
-                  borderColor: '#cbd5e1',
+                  borderColor: '#e5e9f2',
                   borderRadius: '16px',
                   fontSize: '12px',
-                  color: '#0f172a',
-                  boxShadow: '0 8px 20px -4px rgba(15,23,42,0.1)'
+                  color: '#1e2430',
+                  boxShadow: '0 12px 30px -4px rgba(15,23,42,0.1)'
                 }} 
               />
-              <ReferenceLine y={55} stroke="#d97706" strokeDasharray="4 4" label={{ value: 'Limit: 55 dB', fill: '#d97706', fontSize: 10, position: 'right' }} />
+              <ReferenceLine y={55} stroke="#ff5757" strokeDasharray="4 4" label={{ value: 'Limit: 55 dB', fill: '#ff5757', fontSize: 10, position: 'right' }} />
               <Line 
                 type="monotone" 
                 dataKey="value" 
-                stroke="#059669" 
+                stroke="#00a88f" 
                 strokeWidth={2.5} 
-                dot={{ r: 3, fill: '#059669' }} 
-                activeDot={{ r: 6, fill: '#047857' }} 
+                dot={{ r: 3, fill: '#00a88f' }} 
+                activeDot={{ r: 6, fill: '#008a75' }} 
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* ── Recent Incidents Quick Table ─────────────────────────── */}
-      <div className="glass-card p-6">
-        <div className="flex items-center justify-between mb-4">
+      {/* ── 6. Recent Detected Exceedance Incidents in Asymmetric Deck ── */}
+      <div className="shape-asymmetric-deck card-hover-interactive bg-white border border-[#e5e9f2] p-8 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#e5e9f2]">
           <div>
-            <h2 className="text-base font-bold text-[#0f172a]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#ff5757] bg-[#fff0f0] border border-[#ffd1d1] mb-2">
+              <span>OPERATOR TRIAGE</span>
+            </div>
+            <h2 className="text-xl font-bold text-[#1e2430]">
               Recent Detected Sound Exceedance Incidents
             </h2>
-            <p className="text-xs text-[#475569]">
-              Algorithmic screening flags requiring operator review before complaint filing
+            <p className="text-xs text-[#58647a]">
+              Algorithmic screening flags requiring human review before formal complaint filing
             </p>
           </div>
-          <Link to="/reports" className="btn btn-secondary btn-sm text-xs font-semibold">
-            View All Reports
+          <Link to="/reports" className="btn-qwilr-outline text-xs px-5 py-2.5 rounded-full whitespace-nowrap">
+            VIEW ALL REPORTS &rarr;
           </Link>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#e2e8f0] text-[#475569] uppercase tracking-wider font-mono text-[10px] font-bold bg-[#f8fafc]">
-                <th className="p-3">Incident ID</th>
-                <th className="p-3">Timestamp</th>
-                <th className="p-3">Measured Level</th>
-                <th className="p-3">Threshold</th>
-                <th className="p-3">Classification</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-right">Action</th>
+              <tr className="border-b border-[#e5e9f2] text-[#8c97a8] uppercase tracking-wider font-mono text-[10px] font-bold bg-[#fafbfc]">
+                <th className="p-3.5">Incident ID</th>
+                <th className="p-3.5">Timestamp</th>
+                <th className="p-3.5">Measured Level</th>
+                <th className="p-3.5">Threshold</th>
+                <th className="p-3.5">Classification</th>
+                <th className="p-3.5">Status</th>
+                <th className="p-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e2e8f0]">
+            <tbody className="divide-y divide-[#e5e9f2]">
               {(summary?.recent_incidents || []).slice(0, 4).map((inc) => (
                 <tr key={inc.id} className="hover:bg-[#f8fafc] transition-colors">
-                  <td className="p-3 font-mono font-bold text-[#0f172a]">{inc.id}</td>
-                  <td className="p-3 text-[#475569]">{inc.start_time?.substring(0, 16).replace('T', ' ')}</td>
-                  <td className="p-3 font-mono font-bold text-[#d97706]">{inc.measured_value} dB(A)</td>
-                  <td className="p-3 font-mono text-[#475569] font-medium">{inc.threshold_value} dB(A)</td>
-                  <td className="p-3">
-                    <span className="badge-slate capitalize">
+                  <td className="p-3.5 font-mono font-bold text-[#1e2430]">{inc.id}</td>
+                  <td className="p-3.5 text-[#58647a]">{inc.start_time?.substring(0, 16).replace('T', ' ')}</td>
+                  <td className="p-3.5 font-mono font-bold text-[#ff5757]">{inc.measured_value} dB(A)</td>
+                  <td className="p-3.5 font-mono text-[#58647a] font-medium">{inc.threshold_value} dB(A)</td>
+                  <td className="p-3.5">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#f8fafc] text-[#1e2430] border border-[#e5e9f2]">
                       {inc.sound_classification || 'Machinery'}
                     </span>
                   </td>
-                  <td className="p-3">
-                    <span className={inc.status === 'verified' ? 'badge-emerald' : 'badge-amber'}>
+                  <td className="p-3.5">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      inc.status === 'verified' 
+                        ? 'bg-[#f0fdfa] text-[#00a88f] border border-[#99f6e4]' 
+                        : 'bg-[#fffbeb] text-[#d97706] border border-[#fde68a]'
+                    }`}>
                       {inc.status}
                     </span>
                   </td>
-                  <td className="p-3 text-right">
-                    <Link to={`/incidents/${inc.id}`} className="text-[#059669] hover:underline font-bold">
-                      Review Dossier
+                  <td className="p-3.5 text-right">
+                    <Link to={`/incidents/${inc.id}`} className="text-[#00a88f] hover:text-[#008a75] font-bold uppercase text-[11px] tracking-wider">
+                      Review Dossier &rarr;
                     </Link>
                   </td>
                 </tr>

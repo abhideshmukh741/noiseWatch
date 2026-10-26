@@ -42,33 +42,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#fafbfc] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md space-y-6">
         
         {/* Brand Headline */}
         <div className="text-center">
-          <Link to="/" className="inline-block text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            Noise<span className="text-[var(--color-accent)]">Watch</span>
+          <Link to="/" className="inline-block text-2xl font-black tracking-tight text-[#1e2430]">
+            Noise<span className="text-[#00a88f]">Watch</span>
           </Link>
-          <h2 className="text-xl font-bold text-[var(--color-text-primary)] mt-3">
-            Sign In to NoiseWatch
+          <h2 className="text-2xl font-bold text-[#1e2430] mt-3 tracking-tight">
+            Sign In to Telemetry Portal
           </h2>
-          <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-            Access your acoustic monitoring station and incident reports
+          <p className="text-xs text-[#58647a] mt-1">
+            Access authorized acoustic screening stations and regulatory dossiers
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-2xl text-xs text-[#b45309] border border-[#fde68a] bg-[#fef3c7] font-semibold text-center">
+          <div className="p-4 rounded-3xl text-xs text-[#ff5757] border border-[#ffcdd2] bg-[#ffebee] font-bold text-center shadow-xs">
             {error}
           </div>
         )}
 
-        {/* Login Form */}
-        <div className="glass-card p-8 rounded-3xl space-y-5 shadow-lg border border-[#e2e8f0]">
+        {/* Login Form: Cathedral Arch Portal `shape-arch` */}
+        <div className="shape-arch bg-white border border-[#e2e8f0] p-8 sm:p-10 space-y-6 shadow-sm card-hover-interactive">
           <form onSubmit={handleLogin} className="space-y-4 text-xs">
             <div>
-              <label className="text-[11px] font-bold text-[#475569] uppercase block mb-1.5 ml-1">
+              <label className="text-[10px] font-bold text-[#58647a] uppercase block mb-1.5 ml-1 tracking-wider">
                 Email Address
               </label>
               <input
@@ -76,13 +76,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="name@organization.org"
-                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 text-xs text-[#0f172a] focus:outline-none focus:border-[#059669] focus:bg-white font-medium transition-all"
+                placeholder="officer@pollutioncontrol.gov.in"
+                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-5 py-3.5 text-xs text-[#1e2430] focus:outline-none focus:border-[#00a88f] focus:bg-white font-medium transition-all"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#475569] uppercase block mb-1.5 ml-1">
+              <label className="text-[10px] font-bold text-[#58647a] uppercase block mb-1.5 ml-1 tracking-wider">
                 Password
               </label>
               <input
@@ -91,30 +91,30 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 text-xs text-[#0f172a] focus:outline-none focus:border-[#059669] focus:bg-white font-medium transition-all"
+                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-5 py-3.5 text-xs text-[#1e2430] focus:outline-none focus:border-[#00a88f] focus:bg-white font-medium transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full text-xs justify-center py-3 font-bold rounded-full mt-3 shadow-md"
+              className="w-full py-3.5 px-6 rounded-full text-xs font-bold bg-[#00a88f] hover:bg-[#008f7a] text-white shadow-xs transition-colors mt-2"
             >
-              {loading ? 'Authenticating...' : 'Sign In'}
+              {loading ? 'Authenticating...' : 'Sign In to Network'}
             </button>
           </form>
 
           {/* Demo Quick Logins */}
-          <div className="pt-5 border-t border-[#e2e8f0]">
-            <div className="text-[10px] uppercase font-bold text-[#475569] text-center mb-3 tracking-wider">
-              One-Click Demo Account Sign-In
+          <div className="pt-6 border-t border-[#e2e8f0]">
+            <div className="text-[10px] uppercase font-bold text-[#58647a] text-center mb-3 tracking-wider">
+              One-Click Role Demonstration
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickLogin('demo@noisewatch.app', 'demo1234')}
-                className="btn btn-secondary btn-sm py-2 text-xs font-semibold rounded-full"
+                className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#1e2430] transition-colors"
               >
                 Resident
               </button>
@@ -122,7 +122,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('reviewer@noisewatch.app', 'demo1234')}
-                className="btn btn-secondary btn-sm py-2 text-xs font-semibold rounded-full"
+                className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#1e2430] transition-colors"
               >
                 Reviewer
               </button>
@@ -130,7 +130,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('admin@noisewatch.app', 'demo1234')}
-                className="btn btn-secondary btn-sm py-2 text-xs font-semibold rounded-full"
+                className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#1e2430] transition-colors"
               >
                 Admin
               </button>
@@ -138,9 +138,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="text-center text-xs text-[var(--color-text-secondary)]">
+        <div className="text-center text-xs text-[#58647a]">
           Don't have an account?{' '}
-          <Link to="/register" className="text-[var(--color-accent)] hover:underline font-bold">
+          <Link to="/register" className="text-[#00a88f] hover:underline font-bold">
             Sign Up
           </Link>
         </div>

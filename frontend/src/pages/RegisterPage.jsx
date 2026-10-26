@@ -33,32 +33,33 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#fafbfc] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md space-y-6">
         
         {/* Brand Headline */}
         <div className="text-center">
-          <Link to="/" className="inline-block text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            Noise<span className="text-[var(--color-accent)]">Watch</span>
+          <Link to="/" className="inline-block text-2xl font-black tracking-tight text-[#1e2430]">
+            Noise<span className="text-[#00a88f]">Watch</span>
           </Link>
-          <h2 className="text-xl font-bold text-[var(--color-text-primary)] mt-3">
-            Create an Account
+          <h2 className="text-2xl font-bold text-[#1e2430] mt-3 tracking-tight">
+            Create Telemetry Account
           </h2>
-          <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-            Join NoiseWatch to participate in environmental noise monitoring
+          <p className="text-xs text-[#58647a] mt-1">
+            Join NoiseWatch to participate in continuous acoustic compliance screening
           </p>
         </div>
 
         {error && (
-          <div className="glass-card p-3 text-xs text-[var(--color-danger)] border-l-4 border-l-[var(--color-danger)] bg-red-50/70 font-semibold">
+          <div className="p-4 rounded-3xl text-xs text-[#ff5757] border border-[#ffcdd2] bg-[#ffebee] font-bold text-center shadow-xs">
             {error}
           </div>
         )}
 
-        <div className="glass-card p-6 space-y-4">
+        {/* Register Form: Cathedral Arch Portal `shape-arch` */}
+        <div className="shape-arch bg-white border border-[#e2e8f0] p-8 sm:p-10 space-y-6 shadow-sm card-hover-interactive">
           <form onSubmit={handleRegister} className="space-y-4 text-xs">
             <div>
-              <label className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#58647a] uppercase block mb-1.5 ml-1 tracking-wider">
                 Full Name or Organization
               </label>
               <input
@@ -66,27 +67,27 @@ export default function RegisterPage() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
-                placeholder="Dr. Jane Doe / Green Neighborhood Assoc."
-                className="w-full rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] font-medium"
+                placeholder="Dr. Jane Doe / Environmental Board"
+                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-5 py-3.5 text-xs text-[#1e2430] focus:outline-none focus:border-[#00a88f] focus:bg-white font-medium transition-all"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase block mb-1">
-                Email Address
+              <label className="text-[10px] font-bold text-[#58647a] uppercase block mb-1.5 ml-1 tracking-wider">
+                Official Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="jane@organization.org"
-                className="w-full rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] font-medium"
+                placeholder="officer@organization.org"
+                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-5 py-3.5 text-xs text-[#1e2430] focus:outline-none focus:border-[#00a88f] focus:bg-white font-medium transition-all"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#58647a] uppercase block mb-1.5 ml-1 tracking-wider">
                 Password
               </label>
               <input
@@ -95,23 +96,23 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] font-medium"
+                className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-5 py-3.5 text-xs text-[#1e2430] focus:outline-none focus:border-[#00a88f] focus:bg-white font-medium transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full text-xs justify-center py-2.5 font-bold mt-2"
+              className="w-full py-3.5 px-6 rounded-full text-xs font-bold bg-[#00a88f] hover:bg-[#008f7a] text-white shadow-xs transition-colors mt-2"
             >
-              {loading ? 'Creating Account...' : 'Register Account'}
+              {loading ? 'Creating Account...' : 'Register Network Account'}
             </button>
           </form>
         </div>
 
-        <div className="text-center text-xs text-[var(--color-text-secondary)]">
+        <div className="text-center text-xs text-[#58647a]">
           Already registered?{' '}
-          <Link to="/login" className="text-[var(--color-accent)] hover:underline font-bold">
+          <Link to="/login" className="text-[#00a88f] hover:underline font-bold">
             Sign In
           </Link>
         </div>

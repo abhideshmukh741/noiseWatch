@@ -257,21 +257,21 @@ export function MobileNoiseDetector() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-[#cbd5e1] shadow-xs space-y-6">
+    <div className="shape-asymmetric-deck card-hover-interactive bg-white p-7 sm:p-8 border border-[#e5e9f2] shadow-xs space-y-6">
       
       {/* ── Title Banner (Zero Icons) ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#f1f5f9]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e9f2]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="badge-emerald font-mono font-bold text-[10px]">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#00a88f] bg-[#f0fdfa] border border-[#99f6e4]">
               MOBILE GPS
             </span>
             <div>
-              <h2 className="text-base font-bold text-[#0f172a]">
-                Mobile Noise Audit & Citizen Evidence Capture
+              <h2 className="text-base font-bold text-[#1e2430]">
+                Mobile Noise Audit &amp; Citizen Evidence Capture
               </h2>
-              <p className="text-xs text-[#475569]">
-                Zero-Hardware Architecture • Uses Phone GPS & Microphone for Real-Time Statutory Audit
+              <p className="text-xs text-[#58647a]">
+                Zero-Hardware Architecture • Uses Phone GPS &amp; Microphone for Real-Time Statutory Audit
               </p>
             </div>
           </div>

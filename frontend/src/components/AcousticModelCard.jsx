@@ -207,26 +207,26 @@ export function AcousticModelCard() {
   const currentCategory = classificationResult?.category || 'traffic';
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-[#cbd5e1] shadow-xs space-y-6 card-hover-interactive hover:border-[#00a88f]/40">
+    <div className="shape-pebble-2 card-hover-interactive bg-white p-7 sm:p-8 border border-[#e5e9f2] shadow-xs space-y-6">
       
       {/* ── Header: Model Provenance & Status Badge (Zero Icons) ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#f1f5f9]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#e5e9f2]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="badge-emerald font-mono font-bold text-[10px]">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#00a88f] bg-[#f0fdfa] border border-[#99f6e4]">
               ACOUSTIC ML
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-[#0f172a]">
+                <h2 className="text-base font-bold text-[#1e2430]">
                   Acoustic Event Machine Learning Model
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0]">
-                  Real Trained Model (Active)
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f0fdfa] text-[#00a88f] border border-[#99f6e4]">
+                  Active Model
                 </span>
               </div>
-              <p className="text-xs text-[#475569]">
-                {modelInfo?.model_type || 'RandomForestClassifier'} • Version: <span className="font-mono font-bold text-[#0f172a]">{modelInfo?.model_version || 'rf-acoustic-v1.0'}</span>
+              <p className="text-xs text-[#58647a]">
+                {modelInfo?.model_type || 'RandomForestClassifier'} • Version: <span className="font-mono font-bold text-[#1e2430]">{modelInfo?.model_version || 'rf-acoustic-v1.0'}</span>
               </p>
             </div>
           </div>

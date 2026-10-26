@@ -59,30 +59,33 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto space-y-6">
+    <div className="min-h-screen bg-[#fafbfc] p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto space-y-8">
       
-      {/* ── Page Header ──────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#e2e8f0]">
+      {/* ── Architectural Header & Time Capsule ─────────────────────── */}
+      <div className="bg-white border border-[#e2e8f0] p-6 sm:p-8 rounded-tl-[48px] rounded-br-[48px] rounded-tr-2xl rounded-bl-2xl shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e6f7f4] border border-[#a7f3d0] text-[#00a88f] text-[10px] font-bold tracking-widest uppercase mb-2">
+            Acoustic Telemetry Intelligence
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1e2430]">
             Acoustic Analytics & Trend Intelligence
           </h1>
-          <p className="text-xs text-[#475569] mt-1">
-            Historical distribution, statutory exceedance durations, and comparative site benchmarks
+          <p className="text-xs sm:text-sm text-[#58647a] mt-1 max-w-xl">
+            Diurnal sound pressure profiles, cumulative exceedance durations, and statutory municipal compliance benchmarks under CPCB Schedule III.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Curvy Time range switcher */}
-          <div className="flex rounded-full bg-[#f1f5f9] border border-[#e2e8f0] p-1 text-xs">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* Stadium Time Range Capsule */}
+          <div className="flex rounded-full bg-[#f1f5f9] border border-[#e2e8f0] p-1.5 text-xs">
             {['24h', '7d', '30d'].map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-4 py-1 rounded-full font-medium transition-all ${
+                className={`px-4 py-1.5 rounded-full font-bold transition-all duration-200 ${
                   timeRange === range
-                    ? 'bg-[#059669] text-white font-semibold shadow-xs'
-                    : 'text-[#475569] hover:text-[#0f172a]'
+                    ? 'bg-[#1e2430] text-white shadow-xs'
+                    : 'text-[#58647a] hover:text-[#1e2430]'
                 }`}
               >
                 {range.toUpperCase()}
@@ -90,28 +93,33 @@ export default function AnalyticsPage() {
             ))}
           </div>
 
-          {/* Export CSV button */}
+          {/* Export CSV Stadium Button */}
           <button
             onClick={handleExportCSV}
-            className="btn btn-secondary btn-sm text-xs font-semibold px-4 py-1.5 rounded-full"
+            className="px-5 py-2.5 rounded-full text-xs font-bold bg-[#00a88f] hover:bg-[#008f7a] text-white shadow-xs transition-colors"
           >
-            Export CSV
+            Export CSV Dataset
           </button>
         </div>
       </div>
 
-      {/* ── Provenance Notice ─────────────────────────────────────── */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs border border-[#e2e8f0]">
-        <div className="text-[#475569]">
-          <strong className="text-[#0f172a]">Data Provenance:</strong> 84% IoT Sensor Network • 12% Calibrated Samples • 4% Browser Screening
+      {/* ── Provenance Banner (Stadium Pill) ────────────────────────── */}
+      <div className="bg-white border border-[#e2e8f0] px-6 py-3.5 rounded-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="text-[#58647a] flex flex-wrap items-center gap-2">
+          <strong className="text-[#1e2430] font-bold">Data Provenance:</strong>
+          <span>84% Continuous IoT Grid</span>
+          <span>•</span>
+          <span>12% Sound Level Meter Calibrations</span>
+          <span>•</span>
+          <span>4% Citizen Node Screenings</span>
         </div>
-        <span className="badge-emerald text-[11px]">
+        <span className="inline-flex items-center px-3.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#e6f7f4] text-[#00a88f] border border-[#a7f3d0]">
           Completeness: 99.4%
         </span>
       </div>
 
-      {/* ── High-Level Summary Stats ──────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── High-Level Summary Stats with .stat-card-delight ──────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Network Peak Exceedance"
           value="91.2"
@@ -144,131 +152,151 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      {/* ── Hourly Diurnal Trend Line Chart ──────────────────────── */}
-      <div className="glass-card p-6 sm:p-8 rounded-3xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      {/* ── Hourly Diurnal Trend Line Chart (Cathedral Arch Portal) ─── */}
+      <div className="shape-arch bg-white border border-[#e2e8f0] p-6 sm:p-10 shadow-sm card-hover-interactive">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h3 className="text-base font-bold text-[#0f172a]">
-              Diurnal Sound Pressure Curves (Day vs Night Profile)
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#f1f5f9] text-[#1e2430] border border-[#e2e8f0] mb-2">
+              Diurnal Trajectory
+            </span>
+            <h3 className="text-xl font-bold text-[#1e2430] tracking-tight">
+              Sound Pressure Curves (24-Hour Day vs Night Profile)
             </h3>
-            <p className="text-xs text-[#475569] mt-0.5">
-              Comparing average residential and commercial acoustic trajectories over 24 hours
+            <p className="text-xs text-[#58647a] mt-1">
+              Equivalent continuous acoustic pressure compared against CPCB statutory limits (06:00 to 22:00 vs 22:00 to 06:00).
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-mono font-medium">
-            <span className="flex items-center gap-1.5 text-[#059669]">
-              <span className="w-3 h-1 bg-[#059669] inline-block rounded-full" />
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono font-medium bg-[#f8fafc] px-4 py-2.5 rounded-full border border-[#e2e8f0]">
+            <span className="flex items-center gap-1.5 text-[#00a88f]">
+              <span className="w-3 h-1 bg-[#00a88f] inline-block rounded-full" />
               Residential Zone
             </span>
-            <span className="flex items-center gap-1.5 text-[#334155]">
-              <span className="w-3 h-1 bg-[#334155] inline-block rounded-full" />
+            <span className="flex items-center gap-1.5 text-[#1e2430]">
+              <span className="w-3 h-1 bg-[#1e2430] inline-block rounded-full" />
               Commercial Zone
             </span>
-            <span className="flex items-center gap-1.5 text-[#d97706]">
-              <span className="w-3 h-0.5 bg-[#d97706] inline-block border-t border-dashed" />
+            <span className="flex items-center gap-1.5 text-[#ff5757]">
+              <span className="w-3 h-0.5 bg-[#ff5757] inline-block border-t border-dashed" />
               Statutory Limit (55 dB)
             </span>
           </div>
         </div>
 
-        <div className="h-72 w-full">
+        <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={hourlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="hour" stroke="#64748b" tick={{ fontSize: 11 }} />
-              <YAxis domain={[30, 80]} unit=" dB" stroke="#64748b" tick={{ fontSize: 11 }} />
+              <XAxis dataKey="hour" stroke="#58647a" tick={{ fontSize: 11 }} />
+              <YAxis domain={[30, 80]} unit=" dB" stroke="#58647a" tick={{ fontSize: 11 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#ffffff', 
-                  borderColor: '#cbd5e1',
+                  borderColor: '#e2e8f0',
                   borderRadius: '16px',
-                  boxShadow: '0 8px 20px -4px rgba(15, 23, 42, 0.1)',
-                  fontSize: '12px'
+                  boxShadow: '0 8px 24px -4px rgba(30, 36, 48, 0.12)',
+                  fontSize: '12px',
+                  fontFamily: 'inherit'
                 }} 
               />
-              <ReferenceLine y={55} stroke="#d97706" strokeDasharray="3 3" label={{ value: 'Day Limit 55dB', fill: '#d97706', fontSize: 10, position: 'right' }} />
-              <Line type="monotone" dataKey="residential" stroke="#059669" strokeWidth={2.5} dot={false} />
-              <Line type="monotone" dataKey="commercial" stroke="#334155" strokeWidth={2.5} dot={false} />
+              <ReferenceLine y={55} stroke="#ff5757" strokeDasharray="3 3" label={{ value: 'Day Limit 55dB', fill: '#ff5757', fontSize: 10, position: 'right' }} />
+              <Line type="monotone" dataKey="residential" stroke="#00a88f" strokeWidth={3} dot={{ r: 3, fill: '#00a88f' }} />
+              <Line type="monotone" dataKey="commercial" stroke="#1e2430" strokeWidth={3} dot={{ r: 3, fill: '#1e2430' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* ── Multi-Location Benchmark Bar Chart ───────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* ── Multi-Location Benchmark & Exceedance Grid (Non-Cube) ───── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         
-        {/* Average vs Peak Chart */}
-        <div className="glass-card p-6 sm:p-8 rounded-3xl">
+        {/* Average vs Peak Chart: Asymmetric Organic Pebble (`shape-pebble-1`) */}
+        <div className="shape-pebble-1 bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-sm card-hover-interactive">
           <div className="mb-6">
-            <h3 className="text-base font-bold text-[#0f172a]">
-              Site Benchmark: Average vs Peak Sound Levels
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#f1f5f9] text-[#1e2430] border border-[#e2e8f0] mb-2">
+              Cross-Site Comparison
+            </span>
+            <h3 className="text-xl font-bold text-[#1e2430] tracking-tight">
+              Average LAeq vs Peak Lmax Sound Levels
             </h3>
-            <p className="text-xs text-[#475569] mt-0.5">
-              Comparing equivalent energy (LAeq) against max instantaneous levels (Lmax)
+            <p className="text-xs text-[#58647a] mt-1">
+              Comparing equivalent energy (LAeq) against maximum instantaneous peaks registered across stations.
             </p>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={locationComparisonData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="#64748b" />
-                <YAxis domain={[30, 100]} unit=" dB" stroke="#64748b" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="#58647a" />
+                <YAxis domain={[30, 100]} unit=" dB" stroke="#58647a" tick={{ fontSize: 11 }} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: '#ffffff', 
-                    borderColor: '#cbd5e1',
+                    borderColor: '#e2e8f0',
                     borderRadius: '16px',
-                    boxShadow: '0 8px 20px -4px rgba(15, 23, 42, 0.1)',
+                    boxShadow: '0 8px 24px -4px rgba(30, 36, 48, 0.12)',
                     fontSize: '12px'
                   }} 
                 />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
-                <Bar dataKey="avg" name="Avg LAeq" fill="#059669" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="peak" name="Peak Lmax" fill="#d97706" radius={[8, 8, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                <Bar dataKey="avg" name="Avg LAeq" fill="#00a88f" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="peak" name="Peak Lmax" fill="#ff5757" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Exceedance Duration Table & Analysis */}
-        <div className="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-between">
+        {/* Exceedance Duration Analysis: Inverted Arch Portal (`shape-arch-inverted`) */}
+        <div className="shape-arch-inverted bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-sm card-hover-interactive flex flex-col justify-between space-y-6">
           <div>
-            <div className="mb-4">
-              <h3 className="text-base font-bold text-[#0f172a]">
-                Exceedance Duration Analysis
+            <div className="mb-6">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#e6f7f4] text-[#00a88f] border border-[#a7f3d0] mb-2">
+                CPCB Rule 4(1) Analysis
+              </span>
+              <h3 className="text-xl font-bold text-[#1e2430] tracking-tight">
+                Exceedance Duration Breakdown
               </h3>
-              <p className="text-xs text-[#475569] mt-0.5">
-                Total minutes recorded above the configured regulatory threshold
+              <p className="text-xs text-[#58647a] mt-1">
+                Cumulative minutes recorded beyond the configured regulatory baseline.
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {locationComparisonData.map((loc) => (
-                <div key={loc.name} className="p-4 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] text-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-[#0f172a]">{loc.name}</span>
-                    <span className="font-mono font-bold text-[#b45309] bg-[#fef3c7] px-2.5 py-0.5 rounded-full border border-[#fde68a]">{loc.exceedanceMins} mins</span>
+                <div key={loc.name} className="p-4 sm:p-5 rounded-3xl bg-[#f8fafc] border border-[#e2e8f0] text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#1e2430]">{loc.name}</span>
+                    <span className={`font-mono font-bold text-xs px-3 py-1 rounded-full border ${
+                      loc.exceedanceMins > 60 
+                        ? 'bg-[#ffebee] text-[#ff5757] border-[#ffcdd2]' 
+                        : 'bg-[#e6f7f4] text-[#00a88f] border-[#a7f3d0]'
+                    }`}>
+                      {loc.exceedanceMins} mins
+                    </span>
                   </div>
-                  {/* Progress bar with smooth curves */}
-                  <div className="w-full bg-[#e2e8f0] h-2.5 rounded-full overflow-hidden">
+                  
+                  {/* Stadium Progress meter */}
+                  <div className="w-full bg-[#e2e8f0] h-3 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full transition-all duration-500 ${loc.exceedanceMins > 60 ? 'bg-[#d97706]' : 'bg-[#059669]'}`}
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        loc.exceedanceMins > 60 ? 'bg-[#ff5757]' : 'bg-[#00a88f]'
+                      }`}
                       style={{ width: `${Math.min((loc.exceedanceMins / 150) * 100, 100)}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between mt-2 text-[11px] text-[#475569]">
+
+                  <div className="flex items-center justify-between text-[11px] text-[#58647a] pt-1">
                     <span>Threshold: {loc.limit} dB(A)</span>
-                    <span className="font-medium text-[#0f172a]">Peak: {loc.peak} dB(A)</span>
+                    <span className="font-mono font-bold text-[#1e2430]">Peak: {loc.peak} dB(A)</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#e2e8f0] text-[11px] text-[#475569] italic">
-            Continuous duration exceeding 30 minutes triggers automated review alerts.
+          <div className="pt-4 border-t border-[#e2e8f0] text-[11px] text-[#58647a] italic">
+            Continuous duration exceeding 30 minutes triggers automated review alerts and compliance dossier compilation.
           </div>
         </div>
       </div>
