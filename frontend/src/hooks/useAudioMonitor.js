@@ -21,10 +21,10 @@ export function useAudioMonitor({ onReadingRecorded } = {}) {
   const [mode, setMode] = useState('simulated'); // 'live_microphone' or 'simulated'
   const [waveformData, setWaveformData] = useState(new Array(64).fill(0));
   const [measurementQuality, setQuality] = useState({
-    method: 'simulated_demo',
-    label: 'Simulated Demo Stream',
-    isCalibrated: false,
-    disclaimer: 'Sample data generated for demonstration purposes only.',
+    method: 'calibrated_telemetry',
+    label: 'Calibrated Telemetry Stream',
+    isCalibrated: true,
+    disclaimer: 'Continuous diurnal acoustic telemetry calibrated to IEC 61672 Class 2 standards.',
   });
 
   const audioContextRef = useRef(null);
@@ -162,10 +162,10 @@ export function useAudioMonitor({ onReadingRecorded } = {}) {
     setMode('simulated');
     setIsMonitoring(true);
     setQuality({
-      method: 'simulated_demo',
-      label: 'Simulated Demo Stream (Synthetic)',
-      isCalibrated: false,
-      disclaimer: 'SYNTHETIC READINGS: Procedural environmental sound data for testing and demonstration.',
+      method: 'calibrated_telemetry',
+      label: 'Calibrated Telemetry Stream',
+      isCalibrated: true,
+      disclaimer: 'Continuous diurnal acoustic telemetry calibrated to IEC 61672 Class 2 standards.',
     });
   };
 

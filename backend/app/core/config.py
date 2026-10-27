@@ -7,11 +7,15 @@ import os
 class Settings(BaseSettings):
     """Application configuration loaded from environment variables."""
 
-    # Supabase
-    supabase_url: str = "https://your-project.supabase.co"
-    supabase_anon_key: str = "your-anon-key"
-    supabase_service_role_key: str = "your-service-role-key"
+    # Database (Neon / PostgreSQL)
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/noisewatch"
+    database_url_unpooled: Optional[str] = None
+    neon_branch: Optional[str] = None
+
+    # Supabase (Legacy / Fallback)
+    supabase_url: Optional[str] = None
+    supabase_anon_key: Optional[str] = None
+    supabase_service_role_key: Optional[str] = None
 
     # JWT
     jwt_secret: str = "dev-secret-change-in-production"

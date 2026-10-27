@@ -24,9 +24,10 @@ export default function IncidentDetailPage() {
   // Load incident details
   useEffect(() => {
     async function fetchIncident() {
+      if (!id) return;
       try {
         setLoading(true);
-        const res = await incidentsAPI.get(id || 'inc-demo-001');
+        const res = await incidentsAPI.get(id);
         setIncident(res.data);
         setReviewerNotes(res.data.reviewer_notes || '');
       } catch (err) {

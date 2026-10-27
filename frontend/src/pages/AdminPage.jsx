@@ -21,9 +21,9 @@ export default function AdminPage() {
   ]);
   const [auditLogs] = useState([
     { id: 1, action: 'THRESHOLD_UPDATED', actor: 'admin@noisewatch.app', entity: 'Zone: Residential', time: '10 mins ago', status: 'SUCCESS' },
-    { id: 2, action: 'INCIDENT_VERIFIED', actor: 'reviewer@noisewatch.app', entity: 'Incident inc-demo-001', time: '42 mins ago', status: 'SUCCESS' },
-    { id: 3, action: 'REPORT_GENERATED', actor: 'system-agent', entity: 'Report rpt-demo-001', time: '1 hour ago', status: 'SUCCESS' },
-    { id: 4, action: 'SENSOR_CALIBRATION_CHECK', actor: 'admin@noisewatch.app', entity: 'Device DEV-IOT-002', time: '3 hours ago', status: 'SUCCESS' },
+    { id: 2, action: 'INCIDENT_VERIFIED', actor: 'reviewer@noisewatch.app', entity: 'Incident INC-MH-2026-001', time: '42 mins ago', status: 'SUCCESS' },
+    { id: 3, action: 'REPORT_GENERATED', actor: 'system-agent', entity: 'Report RPT-MH-2026-001', time: '1 hour ago', status: 'SUCCESS' },
+    { id: 4, action: 'SENSOR_CALIBRATION_CHECK', actor: 'admin@noisewatch.app', entity: 'Device DEV-MH-001', time: '3 hours ago', status: 'SUCCESS' },
   ]);
   const [notification, setNotification] = useState('');
 

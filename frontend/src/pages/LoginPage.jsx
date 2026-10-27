@@ -1,9 +1,8 @@
 /**
  * Login Page
  * 
- * Secure login with email/password and one-click demo role switchers
- * for Resident, Reviewer, and Administrator.
- * Clean, light environmental design without icons or glassmorphism.
+ * Secure authentication portal for Residents, Reviewers, and Network Administrators.
+ * Clean, environmental design aligned with statutory compliance requirements.
  */
 
 import { useState } from 'react';
@@ -30,15 +29,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Quick Switcher for Demo
-  const handleQuickLogin = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    login(demoEmail, demoPass).then(() => navigate('/dashboard')).catch(() => {
-      setError('Demo login failed. Make sure backend is running.');
-    });
   };
 
   return (
@@ -103,39 +93,6 @@ export default function LoginPage() {
               {loading ? 'Authenticating...' : 'Sign In to Network'}
             </button>
           </form>
-
-          {/* Demo Quick Logins */}
-          <div className="pt-6 border-t border-[#e2e8f0]">
-            <div className="text-[10px] uppercase font-bold text-[#58647a] text-center mb-3 tracking-wider">
-              One-Click Role Demonstration
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('demo@noisewatch.app', 'demo1234')}
-                className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#1e2430] transition-colors"
-              >
-                Resident
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('reviewer@noisewatch.app', 'demo1234')}
-                className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#1e2430] transition-colors"
-              >
-                Reviewer
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin@noisewatch.app', 'demo1234')}
-                className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#1e2430] transition-colors"
-              >
-                Admin
-              </button>
-            </div>
-          </div>
         </div>
 
         <div className="text-center text-xs text-[#58647a]">

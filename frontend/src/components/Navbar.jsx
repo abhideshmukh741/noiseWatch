@@ -109,7 +109,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#e5e9f2] px-3.5 py-1.5 rounded-sm">
                   <span className="w-2 h-2 rounded-full bg-[#00a88f] animate-pulse" />
                   <span className="text-xs font-bold text-[#1e2430]">
-                    {user?.display_name || 'Demo User'}
+                    {user?.display_name || 'Operator'}
                   </span>
                   <span className="text-[10px] uppercase font-mono font-bold text-[#8c97a8] border-l border-[#cbd5e1] pl-2">
                     {user?.role || 'Citizen'}

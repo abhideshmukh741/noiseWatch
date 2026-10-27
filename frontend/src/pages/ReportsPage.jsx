@@ -109,7 +109,6 @@ export default function ReportsPage() {
       setSubmissionFeedback({
         type: 'info',
         message: res.data.message || 'Complaint workflow executed.',
-        isDemo: res.data.is_demo,
       });
     } catch (err) {
       console.error('Complaint submission failed:', err);
@@ -153,11 +152,9 @@ export default function ReportsPage() {
             : 'border-[#fde68a] bg-[#fef3c7] text-[#b45309]'
         }`}>
           <div className="font-bold text-sm">{submissionFeedback.message}</div>
-          {submissionFeedback.isDemo && (
-            <div className="text-[11px] mt-1.5 text-[#58647a]">
-              STATUTORY ADVISORY: NoiseWatch compiles forensic incident packages under the Environment (Protection) Act, 1986. Formal dispatch requires authorized agency credentials or manual citizen signature.
-            </div>
-          )}
+          <div className="text-[11px] mt-1.5 text-[#58647a]">
+            STATUTORY ADVISORY: NoiseWatch compiles forensic incident packages under the Environment (Protection) Act, 1986. Formal dispatch requires authorized agency credentials or manual citizen signature.
+          </div>
         </div>
       )}
 

@@ -12,7 +12,7 @@ export default function StatCard({ title, value, unit, trend, trendLabel, accent
           {title}
         </span>
         {badge && (
-          <span className="demo-badge group-hover:scale-105 group-hover:shadow-xs transition-transform duration-200">
+          <span className="badge-amber group-hover:scale-105 group-hover:shadow-xs transition-transform duration-200">
             {badge}
           </span>
         )}

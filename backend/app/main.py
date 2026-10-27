@@ -48,16 +48,21 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+from app.core.database import check_neon_health
+
+
 # ── Health Check ───────────────────────────────────────────────
 
 @app.get("/health", tags=["System"])
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint with Neon database diagnostics."""
+    db_status = await check_neon_health()
     return {
-        "status": "healthy",
+        "status": "healthy" if db_status.get("connected") else "degraded",
         "service": "NoiseWatch API",
         "version": "1.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "database": db_status,
         "demo_mode": settings.demo_mode,
         "environment": settings.app_env,
     }

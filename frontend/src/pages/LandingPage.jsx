@@ -1008,7 +1008,7 @@ export default function LandingPage() {
             <Link to="/dashboard" className="text-[#58647a] hover:text-[#1e2430] no-underline">Dashboard</Link>
             <Link to="/map" className="text-[#58647a] hover:text-[#1e2430] no-underline">Map</Link>
             <Link to="/reports" className="text-[#58647a] hover:text-[#1e2430] no-underline">Reports</Link>
-            <Link to="/login" className="text-[#58647a] hover:text-[#1e2430] no-underline">Demo Login</Link>
+            <Link to="/login" className="text-[#58647a] hover:text-[#1e2430] no-underline">Sign In</Link>
           </div>
         </div>
       </footer>

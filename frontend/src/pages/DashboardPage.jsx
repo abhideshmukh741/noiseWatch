@@ -16,12 +16,12 @@ import WaveformVisualizer from '../components/WaveformVisualizer';
 import { AcousticModelCard } from '../components/AcousticModelCard';
 import { MobileNoiseDetector } from '../components/MobileNoiseDetector';
 import { useAudioMonitor } from '../hooks/useAudioMonitor';
-import { dashboardAPI, readingsAPI } from '../services/api';
+import { dashboardAPI, readingsAPI, locationsAPI } from '../services/api';
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState(null);
   const [chartData, setChartData] = useState([]);
-  const [selectedLocation] = useState('loc-demo-001');
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const {
     isMonitoring,
@@ -38,11 +38,25 @@ export default function DashboardPage() {
   } = useAudioMonitor();
 
   useEffect(() => {
+    async function initLocations() {
+      try {
+        const locRes = await locationsAPI.list();
+        if (locRes.data.items?.length > 0) {
+          setSelectedLocation(locRes.data.items[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load locations for dashboard:', err);
+      }
+    }
+    initLocations();
+  }, []);
+
+  useEffect(() => {
     async function loadData() {
       try {
         const [sumRes, readRes] = await Promise.all([
           dashboardAPI.getSummary(),
-          readingsAPI.list({ location_id: selectedLocation, hours: 24 }),
+          readingsAPI.list({ ...(selectedLocation ? { location_id: selectedLocation } : {}), hours: 24 }),
         ]);
 
         setSummary(sumRes.data);
