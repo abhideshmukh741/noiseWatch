@@ -18,6 +18,18 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const formatError = (err, fallback) => {
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) {
+      return detail.map((d) => d.msg || d.message || JSON.stringify(d)).join('. ');
+    }
+    if (typeof detail === 'object' && detail !== null) {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+    return fallback;
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
@@ -26,7 +38,7 @@ export default function RegisterPage() {
       await register(email, password, displayName);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed. Try again.');
+      setError(formatError(err, 'Registration failed. Try again.'));
     } finally {
       setLoading(false);
     }
@@ -95,7 +107,8 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="••••••••"
+                minLength={6}
+                placeholder="Minimum 6 characters"
                 className="w-full rounded-full bg-[#f8fafc] border border-[#e2e8f0] px-5 py-3.5 text-xs text-[#1e2430] focus:outline-none focus:border-[#00a88f] focus:bg-white font-medium transition-all"
               />
             </div>

@@ -73,7 +73,7 @@ class LoginRequest(BaseModel):
 
 class RegisterRequest(BaseModel):
     email: str = Field(..., max_length=255)
-    password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=6)
     display_name: str = Field(..., min_length=2, max_length=100)
 
 class TokenResponse(BaseModel):

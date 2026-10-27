@@ -17,6 +17,18 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const formatError = (err, fallback) => {
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) {
+      return detail.map((d) => d.msg || d.message || JSON.stringify(d)).join('. ');
+    }
+    if (typeof detail === 'object' && detail !== null) {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+    return fallback;
+  };
+
   const handleLogin = async (e) => {
     e?.preventDefault();
     setError('');
@@ -25,7 +37,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid email or password.');
+      setError(formatError(err, 'Invalid email or password.'));
     } finally {
       setLoading(false);
     }

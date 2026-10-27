@@ -35,6 +35,22 @@ app.add_middleware(
 
 # ── Global Exception Handler ──────────────────────────────────
 
+from fastapi.exceptions import RequestValidationError
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Format Pydantic validation errors as a clean readable string."""
+    messages = []
+    for err in exc.errors():
+        field = " -> ".join(str(l) for l in err.get("loc", []) if l != "body")
+        msg = err.get("msg", "Invalid value")
+        messages.append(f"{field}: {msg}" if field else msg)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "; ".join(messages)},
+    )
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Catch unhandled exceptions and return a consistent error response."""

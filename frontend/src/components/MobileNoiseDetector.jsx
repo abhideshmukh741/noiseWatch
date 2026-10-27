@@ -205,7 +205,8 @@ export function MobileNoiseDetector() {
       const res = await audioAPI.evaluateMobileReading(payload);
       setVerdictResult(res.data);
     } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Failed to evaluate mobile noise reading');
+      const detail = err.response?.data?.detail;
+      setErrorMsg(typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map((d) => d.msg || JSON.stringify(d)).join(', ') : 'Failed to evaluate mobile noise reading'));
     } finally {
       setEvaluating(false);
     }
