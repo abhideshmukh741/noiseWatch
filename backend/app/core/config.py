@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     app_debug: bool = True
     app_host: str = "0.0.0.0"
     app_port: int = 8001
-    cors_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000,https://noisewatch-kwlu.onrender.com"
+    cors_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000,https://noise-watch-wheat.vercel.app"
 
     # Email
     smtp_host: Optional[str] = None
